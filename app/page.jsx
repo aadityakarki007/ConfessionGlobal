@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function HomePage() {
   const [confession, setConfession] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(''); // State to hold the submission message
 
   const handleSubmit = async (e) => {
     e.preventDefault();
