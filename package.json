@@ -1,0 +1,24 @@
+{
+  "name": "confessout-clone",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.0.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "mongoose": "^8.0.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "next-auth": "^4.24.5"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "14.0.3"
+  }
+}
