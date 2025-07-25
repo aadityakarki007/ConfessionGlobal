@@ -1,14 +1,48 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
   const [confession, setConfession] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState(''); // State to hold the submission message
+  const [message, setMessage] = useState('');
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const position = window.pageYOffset;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = (position / maxScroll) * 100;
+      
+      setScrollPosition(scrollPercentage);
+      
+      // Show indicator on mobile devices
+      const isMobile = window.innerWidth <= 768;
+      setShowScrollIndicator(isMobile && maxScroll > 100);
+    };
+
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      setShowScrollIndicator(isMobile && maxScroll > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    
+    // Initial check
+    handleScroll();
+    handleResize();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!confession.trim()) {
       setMessage('Please enter your confession');
       return;
@@ -23,7 +57,7 @@ export default function HomePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: confession }), // no category
+        body: JSON.stringify({ content: confession }),
       });
 
       const data = await response.json();
@@ -41,80 +75,421 @@ export default function HomePage() {
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToBottom = () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  };
+
   return (
-    <div style={{ minHeight: '100vh', padding: '40px 20px' }}>
-      <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h1 style={{ 
-            fontSize: '3rem', 
-            fontWeight: 'bold', 
-            color: 'white', 
-            marginBottom: '16px',
-            textShadow: '0 2px 10px rgba(0,0,0,0.3)'
-          }}>
-            Anonymous Confessions
-          </h1>
-          <p style={{ 
-            fontSize: '1.2rem', 
-            color: 'rgba(255,255,255,0.9)',
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
-            Share your thoughts, feelings, and secrets in a safe, anonymous space. 
-            Your identity will never be revealed.
-          </p>
-        </div>
+    <>
+      <style jsx>{`
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
 
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div className="glass-effect" style={{ padding: '40px' }}>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Your Confession</label>
-                <textarea
-                  className="form-input form-textarea"
-                  placeholder="Share what's on your mind... (max 2000 characters)"
-                  value={confession}
-                  onChange={(e) => setConfession(e.target.value)}
-                  maxLength={2000}
-                  required
-                />
-                <div style={{ 
-                  textAlign: 'right', 
-                  fontSize: '14px', 
-                  color: 'rgba(255,255,255,0.6)',
-                  marginTop: '8px'
-                }}>
-                  {confession.length}/2000 characters
-                </div>
-              </div>
+        .glass-effect {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-              {message && (
-                <div className={message.includes('submitted') ? 'success' : 'error'}>
-                  {message}
-                </div>
-              )}
+        .form-group {
+          margin-bottom: 20px;
+        }
 
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={isSubmitting}
-                style={{ width: '100%', fontSize: '18px' }}
+        .form-label {
+          display: block;
+          margin-bottom: 8px;
+          color: white;
+          font-weight: 600;
+          font-size: 16px;
+        }
+
+        .form-input {
+          width: 100%;
+          padding: 15px;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+          font-size: 16px;
+          transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+          outline: none;
+          border-color: #4CAF50;
+          background: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .form-input::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-textarea {
+          min-height: 150px;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        .btn {
+          padding: 15px 30px;
+          border: none;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #4CAF50, #45a049);
+          color: white;
+          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: linear-gradient(135deg, #45a049, #3d8b40);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .success {
+          background: rgba(76, 175, 80, 0.2);
+          color: #4CAF50;
+          padding: 15px;
+          border-radius: 8px;
+          margin: 15px 0;
+          border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .error {
+          background: rgba(244, 67, 54, 0.2);
+          color: #f44336;
+          padding: 15px;
+          border-radius: 8px;
+          margin: 15px 0;
+          border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .scroll-indicator {
+          position: fixed;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .scroll-btn {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: rgba(76, 175, 80, 0.9);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .scroll-btn:hover {
+          background: rgba(76, 175, 80, 1);
+          transform: scale(1.1);
+          box-shadow: 0 6px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .scroll-btn.pulse {
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(76, 175, 80, 0.7);
+          }
+          70% {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 20px rgba(76, 175, 80, 0);
+          }
+          100% {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(76, 175, 80, 0);
+          }
+        }
+
+        .scroll-progress {
+          width: 4px;
+          height: 100px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 2px;
+          margin: 10px auto;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .scroll-progress-bar {
+          width: 100%;
+          background: linear-gradient(to bottom, #4CAF50, #45a049);
+          border-radius: 2px;
+          transition: height 0.1s ease;
+          position: absolute;
+          bottom: 0;
+        }
+
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0;
+          min-height: 100vh;
+        }
+
+        @media (max-width: 768px) {
+          .scroll-indicator {
+            right: 10px;
+          }
+          
+          .scroll-btn {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+          }
+          
+          .scroll-progress {
+            height: 80px;
+          }
+        }
+      `}</style>
+
+      <div style={{ 
+        minHeight: '100vh', 
+        padding: '40px 20px',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              color: 'white',
+              marginBottom: '8px',
+              textShadow: '0 2px 10px rgba(0,0,0,0.3)'
+            }}>
+              Global Science Confession 2025
+            </h1>
+
+            <p style={{
+              color: 'rgba(255,255,255,0.8)',
+              fontSize: '14px',
+              marginBottom: '20px',
+              fontWeight: 'bold',
+              textDecoration: 'underline',
+            }}>
+              Powered by{' '}
+              <a
+                href="https://www.hamroeshop.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'white',
+                  textDecoration: 'underline',
+                  fontWeight: 'bold',
+                }}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Anonymously'}
-              </button>
-            </form>
+                Hamro eShop
+              </a>
+            </p>
+
+            <p style={{
+              fontSize: '1rem',
+              color: 'rgba(255,255,255,0.9)',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              Share your thoughts, feelings, and secrets in a safe, anonymous space.
+              Your identity will never be revealed.
+            </p>
           </div>
 
-          <div style={{ 
-            textAlign: 'center', 
-            marginTop: '30px',
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: '14px'
-          }}>
-            <p>🔒 Completely anonymous • No registration required • Safe space</p>
+          <div style={{ maxWidth: '600px', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-effect" style={{ padding: '25px', marginBottom: '20px' }}>
+              <div onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label className="form-label">Your Confession</label>
+                  <textarea
+                    className="form-input form-textarea"
+                    placeholder="Share what's on your mind... (max 2000 characters)"
+                    value={confession}
+                    onChange={(e) => setConfession(e.target.value)}
+                    maxLength={2000}
+                    required
+                  />
+                  <div style={{
+                    textAlign: 'right',
+                    fontSize: '14px',
+                    color: 'rgba(255,255,255,0.6)',
+                    marginTop: '8px'
+                  }}>
+                    {confession.length}/2000 characters
+                  </div>
+                </div>
+
+                {message && (
+                  <div className={message.includes('submitted') ? 'success' : 'error'}>
+                    {message}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleSubmit}
+                  className="btn btn-primary"
+                  disabled={isSubmitting}
+                  style={{ width: '100%', fontSize: '18px' }}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Anonymously'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              textAlign: 'center',
+              marginTop: '30px',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '14px'
+            }}>
+              <p>🔒 Completely anonymous • No registration required • Safe space</p>
+            </div>
+
+            <div style={{
+              textAlign: 'center',
+              marginTop: '40px',
+              padding: '20px',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '16px',
+                marginBottom: '10px'
+              }}>
+                Powered by{' '}
+                <a
+                  href="https://www.hamroeshop.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#4CAF50',
+                    textDecoration: 'underline',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Hamro eShop
+                </a>
+              </p>
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '14px',
+                marginBottom: '10px'
+              }}>
+                <a
+                  href="https://www.hamroeshop.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: 'white',
+                  }}
+                >
+                  www.hamroeshop.com
+                </a>
+              </p>
+              <p style={{
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '14px',
+                marginBottom: '5px'
+              }}>
+                <a
+                  href="https://hamroeshop.com/about-us"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  About Hamro eShop - Smart Shopping
+                </a>
+              </p>
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '14px',
+                marginBottom: '10px'
+              }}>
+                <a
+                  href="https://www.hamroeshop.com/about-us"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: 'white',
+                  }}
+                >
+                  hamroeshop.com/about-us
+                </a>
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Scroll Indicator */}
+        {showScrollIndicator && (
+          <div className="scroll-indicator">
+            {scrollPosition > 20 && (
+              <div 
+                className="scroll-btn pulse" 
+                onClick={scrollToTop}
+                title="Scroll to top"
+              >
+                ↑
+              </div>
+            )}
+            
+            <div className="scroll-progress">
+              <div 
+                className="scroll-progress-bar"
+                style={{ height: `${scrollPosition}%` }}
+              />
+            </div>
+            
+            {scrollPosition < 80 && (
+              <div 
+                className="scroll-btn pulse" 
+                onClick={scrollToBottom}
+                title="Scroll to bottom"
+              >
+                ↓
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }

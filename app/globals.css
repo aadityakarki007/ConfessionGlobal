@@ -225,3 +225,26 @@ a {
     gap: 8px;
   }
 }
+
+.down-arrow {
+  font-size: 3rem;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  user-select: none;
+  animation: bounce 2s infinite;
+  display: none; /* hidden by default */
+}
+
+/* Show only on screens 600px or less */
+@media (max-width: 600px) {
+  .down-arrow {
+    display: block;
+  }
+}
+
+/* Simple bounce animation */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
