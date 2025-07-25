@@ -14,9 +14,9 @@ export default function HomePage() {
       const position = window.pageYOffset;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercentage = (position / maxScroll) * 100;
-      
+
       setScrollPosition(scrollPercentage);
-      
+
       // Show indicator on all devices
       setShowScrollIndicator(maxScroll > 100);
     };
@@ -28,7 +28,7 @@ export default function HomePage() {
 
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
-    
+
     // Initial check
     handleScroll();
     handleResize();
@@ -65,7 +65,7 @@ export default function HomePage() {
         setMessage('Confession submitted successfully!');
         setShowSuccessPopup(true);
         setConfession('');
-        
+
         // Hide popup after 2.5 seconds
         setTimeout(() => {
           setShowSuccessPopup(false);
@@ -141,10 +141,28 @@ export default function HomePage() {
         }
 
         .form-textarea {
-          min-height: 150px;
-          resize: vertical;
-          font-family: inherit;
-        }
+  width: 100%;
+  min-height: 150px; /* default desktop height */
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* Mobile only */
+@media (max-width: 768px) {
+  .form-textarea {
+    height: 40vw;
+    max-height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-textarea {
+    height: 50vw;
+    max-height: 50vh;
+  }
+}
+
 
         .btn {
           padding: 15px 30px;
@@ -319,8 +337,8 @@ export default function HomePage() {
         }
       `}</style>
 
-      <div style={{ 
-        minHeight: '100vh', 
+      <div style={{
+        minHeight: '100vh',
         padding: '40px 20px',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
@@ -507,25 +525,25 @@ export default function HomePage() {
         {showScrollIndicator && (
           <div className="scroll-indicator">
             {scrollPosition > 20 && (
-              <div 
-                className="scroll-btn pulse" 
+              <div
+                className="scroll-btn pulse"
                 onClick={scrollToTop}
                 title="Scroll to top"
               >
                 ↑
               </div>
             )}
-            
+
             <div className="scroll-progress">
-              <div 
+              <div
                 className="scroll-progress-bar"
                 style={{ height: `${scrollPosition}%` }}
               />
             </div>
-            
+
             {scrollPosition < 80 && (
-              <div 
-                className="scroll-btn pulse" 
+              <div
+                className="scroll-btn pulse"
                 onClick={scrollToBottom}
                 title="Scroll to bottom"
               >
