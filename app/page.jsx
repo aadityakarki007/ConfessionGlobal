@@ -362,18 +362,9 @@ export default function HomePage() {
               textDecoration: 'underline',
             }}>
               Powered by{' '}
-              <a
-                href="https://www.hamroeshop.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'white',
-                  textDecoration: 'underline',
-                  fontWeight: 'bold',
-                }}
-              >
+              
                 Hamro eShop
-              </a>
+              
             </p>
 
             <p style={{
@@ -447,69 +438,22 @@ export default function HomePage() {
                 fontSize: '16px',
                 marginBottom: '10px'
               }}>
-                Powered by{' '}
-                <a
-                  href="https://www.hamroeshop.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#4CAF50',
-                    textDecoration: 'underline',
-                    fontWeight: 'bold'
-                  }}
-                >
+                Powered & Developed by{' '}
+                
                   Hamro eShop
-                </a>
+             
               </p>
               <p style={{
                 color: 'rgba(255,255,255,0.8)',
                 fontSize: '14px',
                 marginBottom: '10px'
               }}>
-                <a
-                  href="https://www.hamroeshop.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: 'white',
-                  }}
-                >
-                  www.hamroeshop.com
-                </a>
+               
+                
+              
               </p>
-              <p style={{
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: '14px',
-                marginBottom: '5px'
-              }}>
-                <a
-                  href="https://hamroeshop.com/about-us"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  About Hamro eShop - Smart Shopping
-                </a>
-              </p>
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                fontSize: '14px',
-                marginBottom: '10px'
-              }}>
-                <a
-                  href="https://www.hamroeshop.com/about-us"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: 'white',
-                  }}
-                >
-                  hamroeshop.com/about-us
-                </a>
-              </p>
+              
+              
             </div>
           </div>
         </div>
