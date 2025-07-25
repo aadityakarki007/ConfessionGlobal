@@ -5,6 +5,7 @@ export default function HomePage() {
   const [confession, setConfession] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
@@ -16,15 +17,13 @@ export default function HomePage() {
       
       setScrollPosition(scrollPercentage);
       
-      // Show indicator on mobile devices
-      const isMobile = window.innerWidth <= 768;
-      setShowScrollIndicator(isMobile && maxScroll > 100);
+      // Show indicator on all devices
+      setShowScrollIndicator(maxScroll > 100);
     };
 
     const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      setShowScrollIndicator(isMobile && maxScroll > 100);
+      setShowScrollIndicator(maxScroll > 100);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -63,8 +62,15 @@ export default function HomePage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Your confession has been submitted anonymously!');
+        setMessage('Confession submitted successfully!');
+        setShowSuccessPopup(true);
         setConfession('');
+        
+        // Hide popup after 2.5 seconds
+        setTimeout(() => {
+          setShowSuccessPopup(false);
+          setMessage('');
+        }, 2500);
       } else {
         setMessage(data.error || 'Something went wrong');
       }
@@ -177,6 +183,38 @@ export default function HomePage() {
           border-radius: 8px;
           margin: 15px 0;
           border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .success-popup {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #4CAF50;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          z-index: 2000;
+          border: 2px solid #45a049;
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+          animation: slideInRight 0.3s ease-out;
+          white-space: nowrap;
+        }
+
+        .success-popup-overlay {
+          display: none;
+        }
+
+        @keyframes slideInRight {
+          0% {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         .error {
@@ -458,7 +496,14 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile Scroll Indicator */}
+        {/* Success Popup */}
+        {showSuccessPopup && (
+          <div className="success-popup">
+            ✅ Confession submitted successfully!
+          </div>
+        )}
+
+        {/* Scroll Indicator for All Devices */}
         {showScrollIndicator && (
           <div className="scroll-indicator">
             {scrollPosition > 20 && (

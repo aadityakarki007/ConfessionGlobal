@@ -3,16 +3,56 @@
 import { useState, useEffect } from 'react';
 
 export default function AdminPage() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+    const [loginError, setLoginError] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    
     const [confessions, setConfessions] = useState([]);
     const [stats, setStats] = useState({ total: 0, unread: 0, today: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('all');
 
+    // Check for saved login on component mount
     useEffect(() => {
-        fetchConfessions();
-        fetchStats();
+        const savedAuth = localStorage.getItem('adminAuth');
+        if (savedAuth === 'true') {
+            setIsAuthenticated(true);
+        }
+        setIsLoading(false);
     }, []);
+
+    // Fetch data when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchConfessions();
+            fetchStats();
+        }
+    }, [isAuthenticated]);
+
+    const handleLogin = (e) => {
+        e.preventDefault();
+        setLoginError('');
+
+        // Check credentials
+        if (loginForm.username === 'aaditya12' && loginForm.password === '@Aaditya12..') {
+            setIsAuthenticated(true);
+            
+            // Save authentication state if remember me is checked
+            if (rememberMe) {
+                localStorage.setItem('adminAuth', 'true');
+            }
+        } else {
+            setLoginError('Invalid username or password');
+        }
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('adminAuth');
+        setLoginForm({ username: '', password: '' });
+    };
 
     const fetchConfessions = async () => {
         try {
@@ -84,28 +124,217 @@ export default function AdminPage() {
         }
     };
 
+    const banUser = async (ipAddress) => {
+        // You'll need to implement this function based on your backend
+        console.log('Ban user with IP:', ipAddress);
+    };
+
     const filteredConfessions = confessions.filter(confession => {
         if (filter === 'unread') return !confession.isRead;
         if (filter === 'read') return confession.isRead;
         return true;
     });
 
+    // Login Form
+    if (!isAuthenticated) {
+        return (
+            <div style={{ 
+                minHeight: '100vh', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }}>
+                <div style={{
+                    background: 'white',
+                    padding: '40px',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    width: '100%',
+                    maxWidth: '400px',
+                    margin: '20px'
+                }}>
+                    <h1 style={{
+                        textAlign: 'center',
+                        marginBottom: '30px',
+                        color: '#333',
+                        fontSize: '24px'
+                    }}>
+                        Admin Login
+                    </h1>
+                    
+                    <form onSubmit={handleLogin}>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#555',
+                                fontWeight: '500'
+                            }}>
+                                Username
+                            </label>
+                            <input
+                                type="text"
+                                value={loginForm.username}
+                                onChange={(e) => setLoginForm(prev => ({
+                                    ...prev, 
+                                    username: e.target.value
+                                }))}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    border: '2px solid #ddd',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    boxSizing: 'border-box',
+                                    transition: 'border-color 0.3s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                                required
+                            />
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#555',
+                                fontWeight: '500'
+                            }}>
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                value={loginForm.password}
+                                onChange={(e) => setLoginForm(prev => ({
+                                    ...prev, 
+                                    password: e.target.value
+                                }))}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    border: '2px solid #ddd',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    boxSizing: 'border-box',
+                                    transition: 'border-color 0.3s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                                required
+                            />
+                        </div>
+                        
+                        <div style={{ 
+                            marginBottom: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}>
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                style={{ transform: 'scale(1.2)' }}
+                            />
+                            <label htmlFor="rememberMe" style={{
+                                color: '#555',
+                                fontSize: '14px',
+                                cursor: 'pointer'
+                            }}>
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        {loginError && (
+                            <div style={{
+                                background: '#fee',
+                                color: '#c33',
+                                padding: '10px',
+                                borderRadius: '6px',
+                                marginBottom: '20px',
+                                textAlign: 'center',
+                                fontSize: '14px'
+                            }}>
+                                {loginError}
+                            </div>
+                        )}
+                        
+                        <button
+                            type="submit"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                            }}
+                            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+                            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                        >
+                            Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // Loading state
     if (isLoading) {
         return <div className="loading">Loading admin panel...</div>;
     }
 
+    // Main Admin Dashboard (after login)
     return (
         <div style={{ minHeight: '100vh', paddingBottom: '40px' }}>
             <div className="admin-header">
                 <div className="container">
-                    <h1 style={{
-                        fontSize: '2.5rem',
-                        color: 'white',
-                        textAlign: 'center',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.3)'
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '20px'
                     }}>
-                        Admin Dashboard
-                    </h1>
+                        <h1 style={{
+                            fontSize: '2.5rem',
+                            color: 'white',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                            margin: 0
+                        }}>
+                            Admin Dashboard
+                        </h1>
+                        <button
+                            onClick={handleLogout}
+                            style={{
+                                background: 'rgba(255,255,255,0.2)',
+                                color: 'white',
+                                border: '1px solid rgba(255,255,255,0.3)',
+                                padding: '8px 16px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                transition: 'all 0.3s'
+                            }}
+                            onMouseOver={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.3)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.2)';
+                            }}
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -163,7 +392,7 @@ export default function AdminPage() {
                                 key={confession._id}
                                 style={{
                                     maxWidth: '600px',
-                                    margin: '0 auto 30px auto',  // margin bottom for spacing
+                                    margin: '0 auto 30px auto',
                                     position: 'relative',
                                 }}
                             >
@@ -187,10 +416,8 @@ export default function AdminPage() {
                                         minWidth: '250px',
                                         minHeight: '100px',
                                         maxWidth: '100%',
-                                        padding: '20px 40px 40px 20px',  // extra padding bottom-right for handle space
+                                        padding: '20px 40px 40px 20px',
                                         boxSizing: 'border-box',
-
-                                     
                                     }}
                                 >
                                     {/* Header: Anonymous + Date */}
@@ -271,10 +498,8 @@ export default function AdminPage() {
                                 </div>
                             </div>
                         ))
-
                     )}
                 </div>
-                
             </div>
         </div>
     );
