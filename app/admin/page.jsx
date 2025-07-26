@@ -672,6 +672,7 @@ const shareConfessionAsImage = async (confessionId) => {
                                         color: '#333',
                                         boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
                                         display: 'flex',
+                                        
                                         flexDirection: 'column',
                                         gap: '10px',
                                         position: 'relative',

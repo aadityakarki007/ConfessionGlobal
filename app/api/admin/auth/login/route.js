@@ -1,4 +1,4 @@
-// app/api/admin/auth/login/route.js
+// app/api/admin/auth/login/route.js //
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
