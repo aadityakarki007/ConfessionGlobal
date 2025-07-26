@@ -8,45 +8,49 @@ export default function AdminPage() {
 
 
 
-const shareConfessionAsImage = async (confessionId) => {
-  const confessionElement = document.getElementById(`confession-${confessionId}`);
-  if (!confessionElement) return;
 
-  try {
-    // Clone element into a new white background wrapper
-    const wrapper = document.createElement('div');
-    wrapper.style.backgroundColor = 'white';
-    wrapper.style.padding = '20px';
-    wrapper.style.display = 'inline-block'; // shrink wrap
-    wrapper.appendChild(confessionElement.cloneNode(true));
+    const shareConfessionAsImage = async (confessionId) => {
+        const confessionElement = document.getElementById(`confession-${confessionId}`);
+        if (!confessionElement) return;
 
-    document.body.appendChild(wrapper); // required for rendering
+        try {
+            // Clone element into a new white background wrapper
+            const wrapper = document.createElement('div');
+            wrapper.style.backgroundColor = 'white';
+            wrapper.style.padding = '20px';
+            wrapper.style.display = 'inline-block'; // shrink wrap
+            wrapper.appendChild(confessionElement.cloneNode(true));
 
-    const canvas = await html2canvas(wrapper, {
-      backgroundColor: null, // keeps white background we set
-      useCORS: true, // in case of external images
-      scale: 2, // for higher quality image
-    });
+            document.body.appendChild(wrapper); // required for rendering
 
-    document.body.removeChild(wrapper); // clean up
+            const canvas = await html2canvas(wrapper, {
+                backgroundColor: null, // keeps white background we set
+                useCORS: true, // in case of external images
+                scale: 2, // for higher quality image
+            });
 
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = `confession-${confessionId}.png`;
-    link.click();
-  } catch (error) {
-    console.error('Image generation failed:', error);
-    alert('Failed to create image. Please try again.');
-  }
-};
+            document.body.removeChild(wrapper); // clean up
+
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `confession-${confessionId}.png`;
+            link.click();
+        } catch (error) {
+            console.error('Image generation failed:', error);
+            alert('Failed to create image. Please try again.');
+        }
+    };
 
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const [archived, setArchived] = useState([]); // Archived confessions
+
     const [loginForm, setLoginForm] = useState({ username: '', password: '' });
     const [loginError, setLoginError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
-    
+
     const [confessions, setConfessions] = useState([]);
     const [stats, setStats] = useState({ total: 0, unread: 0, today: 0 });
     const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +77,7 @@ const shareConfessionAsImage = async (confessionId) => {
                 method: 'GET',
                 credentials: 'include', // Include cookies
             });
-            
+
             if (response.ok) {
                 setIsAuthenticated(true);
             }
@@ -293,10 +297,10 @@ const shareConfessionAsImage = async (confessionId) => {
     // Login Form
     if (!isAuthenticated) {
         return (
-            <div style={{ 
-                minHeight: '100vh', 
-                display: 'flex', 
-                alignItems: 'center', 
+            <div style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             }}>
@@ -317,7 +321,7 @@ const shareConfessionAsImage = async (confessionId) => {
                     }}>
                         Admin Login
                     </h1>
-                    
+
                     <form onSubmit={handleLogin}>
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{
@@ -332,7 +336,7 @@ const shareConfessionAsImage = async (confessionId) => {
                                 type="text"
                                 value={loginForm.username}
                                 onChange={(e) => setLoginForm(prev => ({
-                                    ...prev, 
+                                    ...prev,
                                     username: e.target.value
                                 }))}
                                 style={{
@@ -350,7 +354,7 @@ const shareConfessionAsImage = async (confessionId) => {
                                 disabled={isLoggingIn}
                             />
                         </div>
-                        
+
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{
                                 display: 'block',
@@ -364,7 +368,7 @@ const shareConfessionAsImage = async (confessionId) => {
                                 type="password"
                                 value={loginForm.password}
                                 onChange={(e) => setLoginForm(prev => ({
-                                    ...prev, 
+                                    ...prev,
                                     password: e.target.value
                                 }))}
                                 style={{
@@ -382,7 +386,7 @@ const shareConfessionAsImage = async (confessionId) => {
                                 disabled={isLoggingIn}
                             />
                         </div>
-                        
+
                         {loginError && (
                             <div style={{
                                 background: '#fee',
@@ -396,15 +400,15 @@ const shareConfessionAsImage = async (confessionId) => {
                                 {loginError}
                             </div>
                         )}
-                        
+
                         <button
                             type="submit"
                             disabled={isLoggingIn}
                             style={{
                                 width: '100%',
                                 padding: '12px',
-                                background: isLoggingIn 
-                                    ? '#ccc' 
+                                background: isLoggingIn
+                                    ? '#ccc'
                                     : 'linear-gradient(135deg, #667eea, #764ba2)',
                                 color: 'white',
                                 border: 'none',
@@ -437,9 +441,9 @@ const shareConfessionAsImage = async (confessionId) => {
         <div style={{ minHeight: '100vh', paddingBottom: '40px' }}>
             <div className="admin-header">
                 <div className="container">
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
                         alignItems: 'center',
                         flexWrap: 'wrap',
                         gap: '20px'
@@ -529,202 +533,232 @@ const shareConfessionAsImage = async (confessionId) => {
                         filteredConfessions.map((confession) => {
                             const currentSize = getConfessionSize(confession._id);
                             return (
-                            <div
-                                key={confession._id}
-                                style={{
-                                    width: `${currentSize.width}px`,
-                                    margin: '0 auto 30px auto',
-                                    position: 'relative',
-                                }}
-                            >
-                                {/* Size Controls for individual confession */}
-                                <div style={{
-                                    marginBottom: '10px',
-                                    padding: '10px',
-                                    background: '#f8f9fa',
-                                    borderRadius: '6px',
-                                    border: '1px solid #e9ecef',
-                                    display: 'flex',
-                                    gap: '15px',
-                                    alignItems: 'center',
-                                    flexWrap: 'wrap',
-                                    fontSize: '12px'
-                                }}>
-                                    <span style={{ fontWeight: '500', color: '#666' }}>
-                                        Size Controls:
-                                    </span>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <label style={{ color: '#555' }}>W:</label>
-                                        <input
-                                            type="number"
-                                            min="200"
-                                            max="800"
-                                            value={currentSize.width}
-                                            onChange={(e) => updateConfessionSize(confession._id, 'width', e.target.value)}
-                                            style={{
-                                                width: '60px',
-                                                padding: '4px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '3px',
-                                                fontSize: '11px'
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <label style={{ color: '#555' }}>H:</label>
-                                        <input
-                                            type="number"
-                                            min="150"
-                                            max="600"
-                                            value={currentSize.height}
-                                            onChange={(e) => updateConfessionSize(confession._id, 'height', e.target.value)}
-                                            style={{
-                                                width: '60px',
-                                                padding: '4px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '3px',
-                                                fontSize: '11px'
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '5px' }}>
-                                        <button
-                                            onClick={() => setConfessionSizes(prev => ({
-                                                ...prev,
-                                                [confession._id]: { width: 300, height: 300 }
-                                            }))}
-                                            style={{
-                                                background: '#6c757d',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '4px 8px',
-                                                borderRadius: '3px',
-                                                fontSize: '10px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Reset
-                                        </button>
-                                        <button
-                                            onClick={() => setConfessionSizes(prev => ({
-                                                ...prev,
-                                                [confession._id]: { width: 250, height: 200 }
-                                            }))}
-                                            style={{
-                                                background: '#28a745',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '4px 8px',
-                                                borderRadius: '3px',
-                                                fontSize: '10px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Small
-                                        </button>
-                                        <button
-                                            onClick={() => setConfessionSizes(prev => ({
-                                                ...prev,
-                                                [confession._id]: { width: 600, height: 300 }
-                                            }))}
-                                            style={{
-                                                background: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '4px 8px',
-                                                borderRadius: '3px',
-                                                fontSize: '10px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Large
-                                        </button>
-
-                                        <button
-                                            onClick={() => setConfessionSizes(prev => ({
-                                                ...prev,
-                                                [confession._id]: { width: 400, height: 200 }
-                                            }))}
-                                            style={{
-                                                background: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '4px 8px',
-                                                borderRadius: '3px',
-                                                fontSize: '10px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Mid
-                                        </button>
-                                    </div>
-                                </div>
-                                {/* Confession Box */}
                                 <div
-                                    className="card"
-                                    id={`confession-${confession._id}`}
+                                    key={confession._id}
                                     style={{
-                                        border: confession.isRead ? 'none' : '2px solid #ff6b6b',
-                                        opacity: confession.isRead ? 0.8 : 1,
-                                        borderRadius: '12px',
-                                        padding: '20px',
-                                        backgroundColor: 'white',
-                                        color: '#333',
-                                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-                                        display: 'flex',
-                                        
-                                        flexDirection: 'column',
-                                        gap: '10px',
-                                        position: 'relative',
-                                        resize: 'both',
-                                        overflow: 'auto',
-                                        minWidth: '250px',
-                                        minHeight: '100px',
-                                        maxWidth: '100%',
                                         width: `${currentSize.width}px`,
-                                        height: `${currentSize.height}px`,
-                                        boxSizing: 'border-box',
+                                        margin: '0 auto 30px auto',
+                                        position: 'relative',
                                     }}
                                 >
-                                    {/* Header: Anonymous + Date */}
+                                    {/* Size Controls for individual confession */}
+                                    <div style={{
+                                        marginBottom: '10px',
+                                        padding: '10px',
+                                        background: '#f8f9fa',
+                                        borderRadius: '6px',
+                                        border: '1px solid #e9ecef',
+                                        display: 'flex',
+                                        gap: '15px',
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        fontSize: '12px'
+                                    }}>
+                                        <span style={{ fontWeight: '500', color: '#666' }}>
+                                            Size Controls:
+                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <label style={{ color: '#555' }}>W:</label>
+                                            <input
+                                                type="number"
+                                                min="200"
+                                                max="800"
+                                                value={currentSize.width}
+                                                onChange={(e) => updateConfessionSize(confession._id, 'width', e.target.value)}
+                                                style={{
+                                                    width: '60px',
+                                                    padding: '4px',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: '3px',
+                                                    fontSize: '11px'
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <label style={{ color: '#555' }}>H:</label>
+                                            <input
+                                                type="number"
+                                                min="150"
+                                                max="600"
+                                                value={currentSize.height}
+                                                onChange={(e) => updateConfessionSize(confession._id, 'height', e.target.value)}
+                                                style={{
+                                                    width: '60px',
+                                                    padding: '4px',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: '3px',
+                                                    fontSize: '11px'
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                            <button
+                                                onClick={() => setConfessionSizes(prev => ({
+                                                    ...prev,
+                                                    [confession._id]: { width: 350, height: 250 }
+                                                }))}
+                                                style={{
+                                                    background: '#6c757d',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '3px',
+                                                    fontSize: '10px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Reset
+                                            </button>
+                                            <button
+                                                onClick={() => setConfessionSizes(prev => ({
+                                                    ...prev,
+                                                    [confession._id]: { width: 300, height: 150 }
+                                                }))}
+                                                style={{
+                                                    background: '#28a745',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '3px',
+                                                    fontSize: '10px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Small
+                                            </button>
+                                            <button
+                                                onClick={() => setConfessionSizes(prev => ({
+                                                    ...prev,
+                                                    [confession._id]: { width: 600, height: 300 }
+                                                }))}
+                                                style={{
+                                                    background: '#dc3545',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '3px',
+                                                    fontSize: '10px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Large
+                                            </button>
+
+                                            <button
+                                                onClick={() => setConfessionSizes(prev => ({
+                                                    ...prev,
+                                                    [confession._id]: { width: 400, height: 200 }
+                                                }))}
+                                                style={{
+                                                    background: '#dc3545',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '3px',
+                                                    fontSize: '10px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Mid
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {/* Confession Box */}
+                                    <div
+                                        className="card"
+                                        id={`confession-${confession._id}`}
+                                        style={{
+                                            border: confession.isRead ? 'none' : '2px solid #ff6b6b',
+                                            opacity: confession.isRead ? 0.8 : 1,
+                                            borderRadius: '12px',
+                                            padding: '20px',
+                                            backgroundColor: 'white',
+                                            color: '#333',
+                                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                                            display: 'flex',
+
+                                            flexDirection: 'column',
+                                            gap: '10px',
+                                            position: 'relative',
+                                            resize: 'both',
+                                            overflow: 'auto',
+                                            minWidth: '250px',
+                                            minHeight: '100px',
+                                            maxWidth: '100%',
+                                            width: `${currentSize.width}px`,
+                                            height: `${currentSize.height}px`,
+                                            boxSizing: 'border-box',
+                                        }}
+                                    >
+                                        {/* Header: Anonymous + Date */}
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            fontSize: '14px',
+                                            color: '#888',
+                                            flexShrink: 0
+                                        }}>
+                                            <span>Anonymous</span>
+                                            <span>{new Date(confession.createdAt).toLocaleDateString()}</span>
+                                        </div>
+
+                                        {/* Confession Text */}
+                                        <div style={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            lineHeight: '1.6',
+                                            flex: 1,
+                                            overflow: 'auto',
+                                            fontFamily: '"Roboto", monospace'
+                                        }}>
+
+                                            {confession.content}
+                                        </div>
+                                        <div style={{
+                                            color: '#007bff',
+                                            fontSize: '12px',
+                                            position: 'absolute',
+                                            bottom: '10px',
+                                            left: '20px',
+                                            fontWeight: '600',
+                                            opacity: 0.8,
+                                            pointerEvents: 'none',
+                                            fontFamily: '"Roboto", monospace'
+                                        }}>
+                                            GSS Confession
+                                        </div>
+
+                                    </div>
+
+                                    {/* Buttons outside the box */}
                                     <div style={{
                                         display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        fontSize: '14px',
-                                        color: '#888',
-                                        flexShrink: 0
+                                        gap: '10px',
+                                        justifyContent: 'flex-end',
+                                        marginTop: '8px'
                                     }}>
-                                        <span>Anonymous</span>
-                                        <span>{new Date(confession.createdAt).toLocaleDateString()}</span>
-                                    </div>
+                                        {!confession.isRead && (
+                                            <button
+                                                onClick={() => markAsRead(confession._id)}
+                                                style={{
+                                                    background: '#34c759',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '6px 12px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '12px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Mark as Read
+                                            </button>
 
-                                    {/* Confession Text */}
-                                    <div style={{
-    fontWeight: 'bold',
-    fontSize: '16px',
-    lineHeight: '1.6',
-    flex: 1,
-    overflow: 'auto',
-    fontFamily: '"Roboto", monospace'
-}}>
-
-                                        {confession.content}
-                                    </div>
-                                </div>
-
-                                {/* Buttons outside the box */}
-                                <div style={{
-                                    display: 'flex',
-                                    gap: '10px',
-                                    justifyContent: 'flex-end',
-                                    marginTop: '8px'
-                                }}>
-                                    {!confession.isRead && (
+                                        )}
                                         <button
-                                            onClick={() => markAsRead(confession._id)}
+                                            onClick={() => shareConfessionAsImage(confession._id)}
                                             style={{
-                                                background: '#34c759',
+                                                background: '#007aff',
                                                 color: 'white',
                                                 border: 'none',
                                                 padding: '6px 12px',
@@ -733,58 +767,42 @@ const shareConfessionAsImage = async (confessionId) => {
                                                 cursor: 'pointer'
                                             }}
                                         >
-                                            Mark as Read
+                                            Save as Image
                                         </button>
-                                        
-                                    )}
-                                    <button
-    onClick={() => shareConfessionAsImage(confession._id)}
-    style={{
-        background: '#007aff',
-        color: 'white',
-        border: 'none',
-        padding: '6px 12px',
-        borderRadius: '6px',
-        fontSize: '12px',
-        cursor: 'pointer'
-    }}
->
-    Save as Image
-</button>
 
-                                    <button
-                                        onClick={() => deleteConfession(confession._id)}
-                                        style={{
-                                            background: '#ff3b30',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '6px 12px',
-                                            borderRadius: '6px',
-                                            fontSize: '12px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
+                                        <button
+                                            onClick={() => deleteConfession(confession._id)}
+                                            style={{
+                                                background: '#ff3b30',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '6px 12px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
 
-                                    {/* Ban User Button */}
-                                    <button
-                                        onClick={() => banUser(confession.ipAddress)}
-                                        style={{
-                                            background: '#ff9500',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '6px 12px',
-                                            borderRadius: '6px',
-                                            fontSize: '12px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Ban User
-                                    </button>
+                                        {/* Ban User Button */}
+                                        <button
+                                            onClick={() => banUser(confession.ipAddress)}
+                                            style={{
+                                                background: '#ff9500',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '6px 12px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Ban User
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        );
+                            );
                         })
                     )}
                 </div>
