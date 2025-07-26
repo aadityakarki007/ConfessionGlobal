@@ -2,8 +2,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Confession from '@/models/Confession';
+import { withAdminAuth } from '@/lib/auth';
 
-export async function PATCH(request, { params }) {
+async function patchHandler(request, { params }) {
   try {
     const { id } = params;
     const { isRead } = await request.json();
@@ -34,7 +35,7 @@ export async function PATCH(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+async function deleteHandler(request, { params }) {
   try {
     const { id } = params;
 
@@ -60,3 +61,5 @@ export async function DELETE(request, { params }) {
   }
 }
 
+export const PATCH = withAdminAuth(patchHandler);
+export const DELETE = withAdminAuth(deleteHandler);

@@ -6,7 +6,7 @@ export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loginForm, setLoginForm] = useState({ username: '', password: '' });
     const [loginError, setLoginError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     
     const [confessions, setConfessions] = useState([]);
     const [stats, setStats] = useState({ total: 0, unread: 0, today: 0 });
@@ -14,13 +14,9 @@ export default function AdminPage() {
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('all');
 
-    // Check for saved login on component mount
+    // Check authentication status on component mount
     useEffect(() => {
-        const savedAuth = localStorage.getItem('adminAuth');
-        if (savedAuth === 'true') {
-            setIsAuthenticated(true);
-        }
-        setIsLoading(false);
+        checkAuthStatus();
     }, []);
 
     // Fetch data when authenticated
@@ -31,36 +27,81 @@ export default function AdminPage() {
         }
     }, [isAuthenticated]);
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        setLoginError('');
-
-        // Check credentials
-        if (loginForm.username === 'aaditya12' && loginForm.password === '@Aaditya12..') {
-            setIsAuthenticated(true);
+    const checkAuthStatus = async () => {
+        try {
+            const response = await fetch('/api/admin/auth/verify', {
+                method: 'GET',
+                credentials: 'include', // Include cookies
+            });
             
-            // Save authentication state if remember me is checked
-            if (rememberMe) {
-                localStorage.setItem('adminAuth', 'true');
+            if (response.ok) {
+                setIsAuthenticated(true);
             }
-        } else {
-            setLoginError('Invalid username or password');
+        } catch (error) {
+            console.error('Auth check failed:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleLogout = () => {
-        setIsAuthenticated(false);
-        localStorage.removeItem('adminAuth');
-        setLoginForm({ username: '', password: '' });
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoginError('');
+        setIsLoggingIn(true);
+
+        try {
+            const response = await fetch('/api/admin/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Include cookies
+                body: JSON.stringify({
+                    username: loginForm.username,
+                    password: loginForm.password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setIsAuthenticated(true);
+                setLoginForm({ username: '', password: '' });
+            } else {
+                setLoginError(data.error || 'Login failed');
+            }
+        } catch (error) {
+            setLoginError('Network error. Please try again.');
+        } finally {
+            setIsLoggingIn(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/admin/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            setIsAuthenticated(false);
+            setLoginForm({ username: '', password: '' });
+        }
     };
 
     const fetchConfessions = async () => {
         try {
-            const response = await fetch('/api/admin/confessions');
+            const response = await fetch('/api/admin/confessions', {
+                credentials: 'include',
+            });
             const data = await response.json();
 
             if (response.ok) {
                 setConfessions(data);
+            } else if (response.status === 401) {
+                setIsAuthenticated(false);
             } else {
                 setError(data.error || 'Failed to fetch confessions');
             }
@@ -73,11 +114,15 @@ export default function AdminPage() {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('/api/admin/stats');
+            const response = await fetch('/api/admin/stats', {
+                credentials: 'include',
+            });
             const data = await response.json();
 
             if (response.ok) {
                 setStats(data);
+            } else if (response.status === 401) {
+                setIsAuthenticated(false);
             }
         } catch (error) {
             console.error('Failed to fetch stats');
@@ -91,6 +136,7 @@ export default function AdminPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ isRead: true }),
             });
 
@@ -101,6 +147,8 @@ export default function AdminPage() {
                     )
                 );
                 setStats(prev => ({ ...prev, unread: prev.unread - 1 }));
+            } else if (response.status === 401) {
+                setIsAuthenticated(false);
             }
         } catch (error) {
             console.error('Failed to mark as read');
@@ -113,11 +161,14 @@ export default function AdminPage() {
         try {
             const response = await fetch(`/api/admin/confessions/${id}`, {
                 method: 'DELETE',
+                credentials: 'include',
             });
 
             if (response.ok) {
                 setConfessions(prev => prev.filter(conf => conf._id !== id));
                 setStats(prev => ({ ...prev, total: prev.total - 1 }));
+            } else if (response.status === 401) {
+                setIsAuthenticated(false);
             }
         } catch (error) {
             console.error('Failed to delete confession');
@@ -125,8 +176,56 @@ export default function AdminPage() {
     };
 
     const banUser = async (ipAddress) => {
-        // You'll need to implement this function based on your backend
-        console.log('Ban user with IP:', ipAddress);
+        if (!ipAddress) {
+            alert("IP address missing, can't ban user.");
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to ban IP: ${ipAddress} and delete their confessions?`)) return;
+
+        try {
+            // Ban the IP
+            const banResponse = await fetch('/api/admin/ban', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ ip: ipAddress }),
+            });
+
+            const banData = await banResponse.json();
+
+            if (!banResponse.ok) {
+                if (banResponse.status === 401) {
+                    setIsAuthenticated(false);
+                    return;
+                }
+                alert(`Failed to ban IP: ${banData.error || 'Unknown error'}`);
+                return;
+            }
+
+            // Delete all confessions from that IP
+            const delResponse = await fetch('/api/admin/confessions/by-ip', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ ip: ipAddress }),
+            });
+
+            const delData = await delResponse.json();
+
+            if (!delResponse.ok) {
+                alert(`Failed to delete confessions: ${delData.error || 'Unknown error'}`);
+                return;
+            }
+
+            alert(`IP ${ipAddress} banned and ${delData.deletedCount} confession(s) deleted successfully.`);
+
+            // Refresh the confessions list to reflect deletions
+            fetchConfessions();
+
+        } catch (error) {
+            alert('Network error: Failed to ban IP or delete confessions.');
+        }
     };
 
     const filteredConfessions = confessions.filter(confession => {
@@ -192,6 +291,7 @@ export default function AdminPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#667eea'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
                                 required
+                                disabled={isLoggingIn}
                             />
                         </div>
                         
@@ -223,29 +323,8 @@ export default function AdminPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#667eea'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
                                 required
+                                disabled={isLoggingIn}
                             />
-                        </div>
-                        
-                        <div style={{ 
-                            marginBottom: '20px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
-                            <input
-                                type="checkbox"
-                                id="rememberMe"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                                style={{ transform: 'scale(1.2)' }}
-                            />
-                            <label htmlFor="rememberMe" style={{
-                                color: '#555',
-                                fontSize: '14px',
-                                cursor: 'pointer'
-                            }}>
-                                Remember me
-                            </label>
                         </div>
                         
                         {loginError && (
@@ -264,23 +343,27 @@ export default function AdminPage() {
                         
                         <button
                             type="submit"
+                            disabled={isLoggingIn}
                             style={{
                                 width: '100%',
                                 padding: '12px',
-                                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                background: isLoggingIn 
+                                    ? '#ccc' 
+                                    : 'linear-gradient(135deg, #667eea, #764ba2)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
                                 fontSize: '16px',
                                 fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'transform 0.2s'
+                                cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+                                transition: 'transform 0.2s',
+                                opacity: isLoggingIn ? 0.7 : 1
                             }}
-                            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            onMouseDown={(e) => !isLoggingIn && (e.target.style.transform = 'scale(0.98)')}
+                            onMouseUp={(e) => !isLoggingIn && (e.target.style.transform = 'scale(1)')}
+                            onMouseLeave={(e) => !isLoggingIn && (e.target.style.transform = 'scale(1)')}
                         >
-                            Login
+                            {isLoggingIn ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
                 </div>

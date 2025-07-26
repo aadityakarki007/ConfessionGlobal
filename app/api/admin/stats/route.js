@@ -2,16 +2,18 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Confession from '@/models/Confession';
+import { withAdminAuth } from '@/lib/auth';
 
-export async function GET() {
+async function handler(request) {
   try {
     await dbConnect();
 
     const total = await Confession.countDocuments();
     const unread = await Confession.countDocuments({ isRead: false });
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     const todayCount = await Confession.countDocuments({
       createdAt: { $gte: today }
     });
@@ -30,3 +32,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withAdminAuth(handler);
