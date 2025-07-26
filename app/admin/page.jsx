@@ -701,12 +701,14 @@ const shareConfessionAsImage = async (confessionId) => {
 
                                     {/* Confession Text */}
                                     <div style={{
-                                        fontWeight: 'bold',
-                                        fontSize: '16px',
-                                        lineHeight: '1.6',
-                                        flex: 1,
-                                        overflow: 'auto'
-                                    }}>
+    fontWeight: 'bold',
+    fontSize: '16px',
+    lineHeight: '1.6',
+    flex: 1,
+    overflow: 'auto',
+    fontFamily: '"Roboto", monospace'
+}}>
+
                                         {confession.content}
                                     </div>
                                 </div>
