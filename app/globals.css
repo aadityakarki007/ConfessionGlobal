@@ -139,6 +139,13 @@ a {
   padding-top: 12px;
 }
 
+.confession-box {
+  width: 1080px;   /* for Instagram post size */
+  height: 1080px;  /* 1:1 aspect ratio */
+  /* OR for story: 1080x1920 */
+}
+
+
 .category-badge {
   background: linear-gradient(45deg, #667eea, #764ba2);
   color: white;
