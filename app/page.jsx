@@ -98,6 +98,19 @@ export default function HomePage() {
           padding: 0 20px;
         }
 
+        /* Mobile container adjustments */
+        @media (max-width: 768px) {
+          .container {
+            padding: 0 15px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 12px;
+          }
+        }
+
         .glass-effect {
           background: rgba(255, 255, 255, 0.1);
           backdrop-filter: blur(10px);
@@ -106,8 +119,29 @@ export default function HomePage() {
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
+        /* Mobile glass effect adjustments */
+        @media (max-width: 768px) {
+          .glass-effect {
+            border-radius: 16px;
+            margin: 0 8px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .glass-effect {
+            border-radius: 12px;
+            margin: 0 5px;
+          }
+        }
+
         .form-group {
           margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+          .form-group {
+            margin-bottom: 16px;
+          }
         }
 
         .form-label {
@@ -116,6 +150,13 @@ export default function HomePage() {
           color: white;
           font-weight: 600;
           font-size: 16px;
+        }
+
+        @media (max-width: 480px) {
+          .form-label {
+            font-size: 14px;
+            margin-bottom: 6px;
+          }
         }
 
         .form-input {
@@ -127,6 +168,7 @@ export default function HomePage() {
           color: white;
           font-size: 16px;
           transition: all 0.3s ease;
+          box-sizing: border-box;
         }
 
         .form-input:focus {
@@ -141,28 +183,38 @@ export default function HomePage() {
         }
 
         .form-textarea {
-  width: 100%;
-  min-height: 150px; /* default desktop height */
-  resize: vertical;
-  font-family: inherit;
-  box-sizing: border-box;
-}
+          width: 100%;
+          min-height: 150px;
+          resize: vertical;
+          font-family: inherit;
+          box-sizing: border-box;
+        }
 
-/* Mobile only */
-@media (max-width: 768px) {
-  .form-textarea {
-    height: 40vw;
-    max-height: 60vh;
-  }
-}
+        /* Mobile textarea optimizations */
+        @media (max-width: 768px) {
+          .form-input {
+            padding: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            border-radius: 10px;
+          }
+          
+          .form-textarea {
+            min-height: 120px;
+            height: auto;
+            resize: none; /* Disable resize on mobile */
+          }
+        }
 
-@media (max-width: 480px) {
-  .form-textarea {
-    height: 50vw;
-    max-height: 50vh;
-  }
-}
-
+        @media (max-width: 480px) {
+          .form-input {
+            padding: 10px;
+            border-radius: 8px;
+          }
+          
+          .form-textarea {
+            min-height: 100px;
+          }
+        }
 
         .btn {
           padding: 15px 30px;
@@ -176,6 +228,25 @@ export default function HomePage() {
           letter-spacing: 1px;
         }
 
+        /* Mobile button optimizations */
+        @media (max-width: 768px) {
+          .btn {
+            padding: 14px 25px;
+            font-size: 15px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .btn {
+            padding: 12px 20px;
+            font-size: 14px;
+            border-radius: 8px;
+            letter-spacing: 0.3px;
+          }
+        }
+
         .btn-primary {
           background: linear-gradient(135deg, #4CAF50, #45a049);
           color: white;
@@ -186,6 +257,15 @@ export default function HomePage() {
           background: linear-gradient(135deg, #45a049, #3d8b40);
           transform: translateY(-2px);
           box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Disable hover effects on mobile */
+        @media (max-width: 768px) {
+          .btn-primary:hover:not(:disabled) {
+            transform: none;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+          }
         }
 
         .btn:disabled {
@@ -203,6 +283,14 @@ export default function HomePage() {
           border: 1px solid rgba(76, 175, 80, 0.3);
         }
 
+        @media (max-width: 480px) {
+          .success {
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 14px;
+          }
+        }
+
         .success-popup {
           position: fixed;
           top: 20px;
@@ -218,6 +306,19 @@ export default function HomePage() {
           box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
           animation: slideInRight 0.3s ease-out;
           white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+          .success-popup {
+            top: 15px;
+            right: 15px;
+            left: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            font-size: 13px;
+            white-space: normal;
+            text-align: center;
+          }
         }
 
         .success-popup-overlay {
@@ -242,6 +343,14 @@ export default function HomePage() {
           border-radius: 8px;
           margin: 15px 0;
           border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        @media (max-width: 480px) {
+          .error {
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 14px;
+          }
         }
 
         .scroll-indicator {
@@ -335,6 +444,22 @@ export default function HomePage() {
             height: 80px;
           }
         }
+
+        @media (max-width: 480px) {
+          .scroll-indicator {
+            right: 8px;
+          }
+          
+          .scroll-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+          }
+          
+          .scroll-progress {
+            height: 60px;
+          }
+        }
       `}</style>
 
       <div style={{
@@ -345,7 +470,7 @@ export default function HomePage() {
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h1 style={{
-              fontSize: '2rem',
+              fontSize: 'clamp(1.5rem, 4vw, 2rem)',
               fontWeight: 'bold',
               color: 'white',
               marginBottom: '8px',
@@ -356,30 +481,38 @@ export default function HomePage() {
 
             <p style={{
               color: 'rgba(255,255,255,0.8)',
-              fontSize: '14px',
+              fontSize: 'clamp(12px, 3vw, 14px)',
               marginBottom: '20px',
               fontWeight: 'bold',
               textDecoration: 'underline',
             }}>
               Powered by{' '}
-              
-                Hamro eShop
-              
+              Hamro eShop
             </p>
 
             <p style={{
-              fontSize: '1rem',
+              fontSize: 'clamp(14px, 3.5vw, 16px)',
               color: 'rgba(255,255,255,0.9)',
               maxWidth: '600px',
-              margin: '0 auto'
+              margin: '0 auto',
+              padding: '0 10px'
             }}>
               Share your thoughts, feelings, and secrets in a safe, anonymous space.
               Your identity will never be revealed.
             </p>
           </div>
 
-          <div style={{ maxWidth: '600px', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div className="glass-effect" style={{ padding: '25px', marginBottom: '20px' }}>
+          <div style={{ 
+            maxWidth: '600px', 
+            margin: '0 auto', 
+            flex: 1, 
+            display: 'flex', 
+            flexDirection: 'column' 
+          }}>
+            <div className="glass-effect" style={{ 
+              padding: 'clamp(15px, 4vw, 25px)', 
+              marginBottom: '20px' 
+            }}>
               <div onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label className="form-label">Your Confession</label>
@@ -393,7 +526,7 @@ export default function HomePage() {
                   />
                   <div style={{
                     textAlign: 'right',
-                    fontSize: '14px',
+                    fontSize: 'clamp(12px, 3vw, 14px)',
                     color: 'rgba(255,255,255,0.6)',
                     marginTop: '8px'
                   }}>
@@ -411,7 +544,10 @@ export default function HomePage() {
                   onClick={handleSubmit}
                   className="btn btn-primary"
                   disabled={isSubmitting}
-                  style={{ width: '100%', fontSize: '18px' }}
+                  style={{ 
+                    width: '100%', 
+                    fontSize: 'clamp(14px, 4vw, 18px)' 
+                  }}
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Anonymously'}
                 </button>
@@ -422,7 +558,8 @@ export default function HomePage() {
               textAlign: 'center',
               marginTop: '30px',
               color: 'rgba(255,255,255,0.7)',
-              fontSize: '14px'
+              fontSize: 'clamp(12px, 3vw, 14px)',
+              padding: '0 10px'
             }}>
               <p>🔒 Completely anonymous • No registration required • Safe space</p>
             </div>
@@ -430,30 +567,17 @@ export default function HomePage() {
             <div style={{
               textAlign: 'center',
               marginTop: '40px',
-              padding: '20px',
+              padding: 'clamp(15px, 4vw, 20px)',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
               <p style={{
                 color: 'rgba(255,255,255,0.8)',
-                fontSize: '16px',
+                fontSize: 'clamp(14px, 3.5vw, 16px)',
                 marginBottom: '10px'
               }}>
                 Powered & Developed by{' '}
-                
-                  Hamro eShop
-             
+                Hamro eShop
               </p>
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                fontSize: '14px',
-                marginBottom: '10px'
-              }}>
-               
-                
-              
-              </p>
-              
-              
             </div>
           </div>
         </div>
