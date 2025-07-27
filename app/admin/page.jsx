@@ -34,8 +34,38 @@ export default function AdminPage() {
                 clonedElement.style.maxHeight = '800px';
                 clonedElement.style.margin = 'auto';
             }
-            wrapper.appendChild(clonedElement);
 
+            // Fix gradient text issues for image generation
+            // Find all elements with gradient text styling and convert to solid color
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach(element => {
+                const computedStyle = window.getComputedStyle(element);
+                // Check if element has WebkitBackgroundClip: text
+                if (element.style.WebkitBackgroundClip === 'text' || 
+                    element.style.webkitBackgroundClip === 'text' ||
+                    computedStyle.webkitBackgroundClip === 'text') {
+                    
+                    // Remove gradient and set solid color
+                    element.style.background = 'none';
+                    element.style.WebkitBackgroundClip = 'unset';
+                    element.style.webkitBackgroundClip = 'unset';
+                    element.style.WebkitTextFillColor = '#667eea';
+                    element.style.webkitTextFillColor = '#667eea';
+                    element.style.color = '#667eea';
+                }
+                
+                // Also check for background gradient and transparent text
+                if ((element.style.background && element.style.background.includes('gradient')) &&
+                    (element.style.WebkitTextFillColor === 'transparent' || 
+                     element.style.webkitTextFillColor === 'transparent')) {
+                    element.style.background = 'none';
+                    element.style.WebkitTextFillColor = '#667eea';
+                    element.style.webkitTextFillColor = '#667eea';
+                    element.style.color = '#667eea';
+                }
+            });
+
+            wrapper.appendChild(clonedElement);
             document.body.appendChild(wrapper);
 
             const canvas = await html2canvas(wrapper, {
