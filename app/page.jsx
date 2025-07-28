@@ -518,10 +518,10 @@ export default function HomePage() {
                   <label className="form-label">Your Confession</label>
                   <textarea
                     className="form-input form-textarea"
-                    placeholder="Share what's on your mind... (max 2000 characters)"
+                    placeholder="Share what's on your mind... (max  characters)"
                     value={confession}
                     onChange={(e) => setConfession(e.target.value)}
-                    maxLength={2000}
+                    maxLength={1500}
                     required
                   />
                   <div style={{
@@ -530,7 +530,7 @@ export default function HomePage() {
                     color: 'rgba(255,255,255,0.6)',
                     marginTop: '8px'
                   }}>
-                    {confession.length}/2000 characters
+                    {confession.length}/1500 characters
                   </div>
                 </div>
 

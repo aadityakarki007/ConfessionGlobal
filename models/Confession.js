@@ -5,7 +5,7 @@ const ConfessionSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxLength: 2000
+    maxLength: 1500
   },
   category: {
     type: String,

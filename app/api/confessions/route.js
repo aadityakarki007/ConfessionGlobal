@@ -15,9 +15,9 @@ export async function POST(request) {
       );
     }
 
-    if (content.length > 2000) {
+    if (content.length > 1500) {
       return NextResponse.json(
-        { error: 'Confession is too long (max 2000 characters)' },
+        { error: 'Confession is too long (max 1500 characters)' },
         { status: 400 }
       );
     }

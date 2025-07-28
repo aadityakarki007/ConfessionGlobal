@@ -698,6 +698,43 @@ export default function AdminPage() {
                         >
                             Mid
                         </button>
+                        <button
+                            onClick={() => setConfessionSizes(prev => ({
+                                ...prev,
+                                [confession._id]: { width: 500, height:300 }
+                            }))}
+                            style={{
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '3px',
+                                fontSize: '10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                        Proper
+                        </button>
+<button
+    onClick={() => setConfessionSizes(prev => ({
+        ...prev,
+        [confession._id]: { width: 600, height: 800 }
+    }))}
+    style={{
+        background: '#dc3545',
+        color: 'white',
+        border: 'none',
+        padding: '6px 12px',
+        borderRadius: '4px',
+        fontSize: '12px',
+        cursor: 'pointer'
+    }}
+>
+    Long Text
+</button>
+
+
+                        
                     </div>
                 </div>
                 

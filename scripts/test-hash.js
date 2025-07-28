@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: '.env.local' });
 
 async function testHash() {
-    const password = '@Aaditya12..';
+    const password = '@gssconfess12..';
     const hash = '$2a$12$D.d/H5ShPwGubEjawfoJGOPjNRTZN3E4RrWuPMc7FzdgYa5iWu/56';
     
     console.log('=== HASH TEST ===');
@@ -23,10 +23,7 @@ async function testHash() {
             // Test different possible passwords
             const variations = [
                 '@Aaditya12..',
-                '@Aaditya12.',
-                'Aaditya12',
-                '@aaditya12..',
-                '@Aaditya12',
+                '@gssconfess12...',
             ];
             
             for (const variant of variations) {
