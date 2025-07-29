@@ -39,47 +39,57 @@ export default function HomePage() {
     };
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!confession.trim()) {
-      setMessage('Please enter your confession');
+  if (!confession.trim()) {
+    setMessage('Please enter your confession');
+    return;
+  }
+
+  // Name filter check (case insensitive)
+  const forbiddenNames = ['subhekshya', 'subekshya', 'suvekshya'];
+  const lowerConfession = confession.toLowerCase();
+
+  for (let name of forbiddenNames) {
+    if (lowerConfession.includes(name)) {
+      setMessage("Sorry, you can't mention this name.");
       return;
     }
+  }
 
-    setIsSubmitting(true);
-    setMessage('');
+  setIsSubmitting(true);
+  setMessage('');
+  
+  try {
+    const response = await fetch('/api/confessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content: confession }),
+    });
 
-    try {
-      const response = await fetch('/api/confessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: confession }),
-      });
+    const data = await response.json();
 
-      const data = await response.json();
+    if (response.ok) {
+      setMessage('Confession submitted successfully!');
+      setShowSuccessPopup(true);
+      setConfession('');
 
-      if (response.ok) {
-        setMessage('Confession submitted successfully!');
-        setShowSuccessPopup(true);
-        setConfession('');
-
-        // Hide popup after 2.5 seconds
-        setTimeout(() => {
-          setShowSuccessPopup(false);
-          setMessage('');
-        }, 2500);
-      } else {
-        setMessage(data.error || 'Something went wrong');
-      }
-    } catch (error) {
-      setMessage('Network error. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+        setMessage('');
+      }, 2500);
+    } else {
+      setMessage(data.error || 'Something went wrong');
     }
-  };
+  } catch (error) {
+    setMessage('Network error. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -502,16 +512,16 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ 
-            maxWidth: '600px', 
-            margin: '0 auto', 
-            flex: 1, 
-            display: 'flex', 
-            flexDirection: 'column' 
+          <div style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            <div className="glass-effect" style={{ 
-              padding: 'clamp(15px, 4vw, 25px)', 
-              marginBottom: '20px' 
+            <div className="glass-effect" style={{
+              padding: 'clamp(15px, 4vw, 25px)',
+              marginBottom: '20px'
             }}>
               <div onSubmit={handleSubmit}>
                 <div className="form-group">
@@ -544,9 +554,9 @@ export default function HomePage() {
                   onClick={handleSubmit}
                   className="btn btn-primary"
                   disabled={isSubmitting}
-                  style={{ 
-                    width: '100%', 
-                    fontSize: 'clamp(14px, 4vw, 18px)' 
+                  style={{
+                    width: '100%',
+                    fontSize: 'clamp(14px, 4vw, 18px)'
                   }}
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Anonymously'}
