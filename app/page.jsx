@@ -53,7 +53,7 @@ export default function HomePage() {
 
   for (let name of forbiddenNames) {
     if (lowerConfession.includes(name)) {
-      setMessage("Sorry, you can't mention this name.");
+      setMessage("Sorry, you can't mention this.");
       return;
     }
   }
