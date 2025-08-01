@@ -84,6 +84,8 @@ export default function AdminPage() {
                 document.body.removeChild(wrapper);
             }
 
+
+            
             // Add this check for iOS
             if (canvas.width === 0 || canvas.height === 0) {
                 throw new Error('Canvas rendering failed - invalid dimensions');

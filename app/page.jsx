@@ -489,7 +489,7 @@ export default function HomePage() {
               Global Science Confession 2025
             </h1>
 
-            
+           
 
             <p style={{
               fontSize: 'clamp(14px, 3.5vw, 16px)',
@@ -571,7 +571,7 @@ export default function HomePage() {
               padding: 'clamp(15px, 4vw, 20px)',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
-              
+             
             </div>
           </div>
         </div>
@@ -618,3 +618,5 @@ export default function HomePage() {
     </>
   );
 }
+
+//haha
