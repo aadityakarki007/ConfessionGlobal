@@ -11,7 +11,7 @@ export default function AdminPage() {
         try {
             // Clone element into a new wrapper with Instagram-optimized styling if needed
             const wrapper = document.createElement('div');
-            
+
             if (isInstagram) {
                 // Instagram optimal styling
                 wrapper.style.backgroundColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -27,7 +27,7 @@ export default function AdminPage() {
                 wrapper.style.padding = '20px';
                 wrapper.style.display = 'inline-block';
             }
-            
+
             const clonedElement = confessionElement.cloneNode(true);
             if (isInstagram) {
                 clonedElement.style.maxWidth = '800px';
@@ -41,10 +41,10 @@ export default function AdminPage() {
             allElements.forEach(element => {
                 const computedStyle = window.getComputedStyle(element);
                 // Check if element has WebkitBackgroundClip: text
-                if (element.style.WebkitBackgroundClip === 'text' || 
+                if (element.style.WebkitBackgroundClip === 'text' ||
                     element.style.webkitBackgroundClip === 'text' ||
                     computedStyle.webkitBackgroundClip === 'text') {
-                    
+
                     // Remove gradient and set solid color
                     element.style.background = 'none';
                     element.style.WebkitBackgroundClip = 'unset';
@@ -53,11 +53,11 @@ export default function AdminPage() {
                     element.style.webkitTextFillColor = '#667eea';
                     element.style.color = '#667eea';
                 }
-                
+
                 // Also check for background gradient and transparent text
                 if ((element.style.background && element.style.background.includes('gradient')) &&
-                    (element.style.WebkitTextFillColor === 'transparent' || 
-                     element.style.webkitTextFillColor === 'transparent')) {
+                    (element.style.WebkitTextFillColor === 'transparent' ||
+                        element.style.webkitTextFillColor === 'transparent')) {
                     element.style.background = 'none';
                     element.style.WebkitTextFillColor = '#667eea';
                     element.style.webkitTextFillColor = '#667eea';
@@ -69,14 +69,25 @@ export default function AdminPage() {
             document.body.appendChild(wrapper);
 
             const canvas = await html2canvas(wrapper, {
-                backgroundColor: null,
+                backgroundColor: isInstagram ? '#667eea' : '#ffffff',
                 useCORS: true,
-                scale: 2,
+                allowTaint: true,
+                scale: window.devicePixelRatio || 1,
                 width: isInstagram ? 1080 : undefined,
                 height: isInstagram ? 1080 : undefined,
+                logging: false,
+                removeContainer: true
             });
 
-            document.body.removeChild(wrapper);
+            // Clean up wrapper first
+            if (document.body.contains(wrapper)) {
+                document.body.removeChild(wrapper);
+            }
+
+            // Add this check for iOS
+            if (canvas.width === 0 || canvas.height === 0) {
+                throw new Error('Canvas rendering failed - invalid dimensions');
+            }
 
             if (isInstagram) {
                 let shareSuccess = false;
@@ -86,7 +97,7 @@ export default function AdminPage() {
                     try {
                         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                         const file = new File([blob], `confession-${confessionId}-instagram.png`, { type: 'image/png' });
-                        
+
                         if (navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
@@ -105,14 +116,14 @@ export default function AdminPage() {
                     try {
                         // First check if we can write to clipboard
                         const permissionStatus = await navigator.permissions.query({ name: 'clipboard-write' });
-                        
+
                         if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
                             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                             const item = new ClipboardItem({ 'image/png': blob });
                             await navigator.clipboard.write([item]);
-                            
+
                             alert('✅ Image copied to clipboard!\n\nNow you can:\n1. Open Instagram\n2. Create a new post\n3. Paste the image (Ctrl+V or Cmd+V)');
-                            
+
                             // Open Instagram in new tab
                             window.open('https://www.instagram.com/', '_blank');
                             shareSuccess = true;
@@ -125,161 +136,161 @@ export default function AdminPage() {
                 // Method 3: Fallback - Show image with instructions
                 if (!shareSuccess) {
                     const image = canvas.toDataURL('image/png');
-                    
+
                     // Create a better sharing interface
                     const shareWindow = window.open('', '_blank', 'width=600,height=700,scrollbars=yes');
                     shareWindow.document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                            <head>
-                                <title>Share to Instagram - GSS Confession</title>
-                                <meta name="viewport" content="width=device-width, initial-scale=1">
-                                <style>
-                                    body { 
-                                        margin: 0; 
-                                        padding: 20px; 
-                                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                                        background: #f8f9fa;
-                                        text-align: center;
-                                    }
-                                    .container { max-width: 500px; margin: 0 auto; }
-                                    .header { 
-                                        background: linear-gradient(45deg, #E4405F, #C13584);
-                                        color: white;
-                                        padding: 20px;
-                                        border-radius: 12px;
-                                        margin-bottom: 20px;
-                                    }
-                                    .image-container {
-                                        background: white;
-                                        padding: 15px;
-                                        border-radius: 12px;
-                                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                                        margin-bottom: 20px;
-                                    }
-                                    .confession-image {
-                                        max-width: 100%;
-                                        height: auto;
-                                        border-radius: 8px;
-                                        cursor: pointer;
-                                        transition: transform 0.2s;
-                                    }
-                                    .confession-image:hover {
-                                        transform: scale(1.02);
-                                    }
-                                    .instructions {
-                                        background: white;
-                                        padding: 20px;
-                                        border-radius: 12px;
-                                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                                        margin-bottom: 20px;
-                                        text-align: left;
-                                    }
-                                    .step {
-                                        display: flex;
-                                        align-items: center;
-                                        margin-bottom: 15px;
-                                        padding: 10px;
-                                        background: #f8f9fa;
-                                        border-radius: 8px;
-                                    }
-                                    .step-number {
-                                        background: #E4405F;
-                                        color: white;
-                                        width: 24px;
-                                        height: 24px;
-                                        border-radius: 50%;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-weight: bold;
-                                        font-size: 12px;
-                                        margin-right: 12px;
-                                        flex-shrink: 0;
-                                    }
-                                    .buttons {
-                                        display: flex;
-                                        gap: 10px;
-                                        justify-content: center;
-                                        flex-wrap: wrap;
-                                    }
-                                    .btn {
-                                        padding: 12px 24px;
-                                        border: none;
-                                        border-radius: 8px;
-                                        font-weight: 600;
-                                        cursor: pointer;
-                                        text-decoration: none;
-                                        display: inline-block;
-                                        transition: transform 0.2s;
-                                    }
-                                    .btn:hover { transform: translateY(-1px); }
-                                    .btn-instagram {
-                                        background: linear-gradient(45deg, #E4405F, #C13584);
-                                        color: white;
-                                    }
-                                    .btn-download {
-                                        background: #28a745;
-                                        color: white;
-                                    }
-                                    .btn-close {
-                                        background: #6c757d;
-                                        color: white;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="container">
-                                    <div class="header">
-                                        <h2 style="margin: 0; margin-bottom: 5px;">📸 Ready for Instagram!</h2>
-                                        <p style="margin: 0; opacity: 0.9; font-size: 14px;">Your confession is perfectly sized for Instagram</p>
-                                    </div>
-                                    
-                                    <div class="image-container">
-                                        <img src="${image}" class="confession-image" alt="Confession for Instagram" 
-                                             onclick="this.style.transform='scale(1.1)'; setTimeout(() => this.style.transform='scale(1)', 200);" />
-                                    </div>
-                                    
-                                    <div class="instructions">
-                                        <h3 style="margin-top: 0; color: #333;">📋 How to share:</h3>
-                                        <div class="step">
-                                            <div class="step-number">1</div>
-                                            <div>Right-click the image above and select <strong>"Save image as..."</strong> or <strong>"Copy image"</strong></div>
-                                        </div>
-                                        <div class="step">
-                                            <div class="step-number">2</div>
-                                            <div>Open Instagram (web or app) and create a new post</div>
-                                        </div>
-                                        <div class="step">
-                                            <div class="step-number">3</div>
-                                            <div>Upload the saved image or paste it directly (Ctrl+V / Cmd+V)</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="buttons">
-                                        <a href="https://www.instagram.com/" target="_blank" class="btn btn-instagram">
-                                            Open Instagram
-                                        </a>
-                                        <button onclick="downloadImage()" class="btn btn-download">
-                                            Download Image
-                                        </button>
-                                        <button onclick="window.close()" class="btn btn-close">
-                                            Close
-                                        </button>
-                                    </div>
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Share to Instagram - GSS Confession</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <style>
+                            body { 
+                                margin: 0; 
+                                padding: 20px; 
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                background: #f8f9fa;
+                                text-align: center;
+                            }
+                            .container { max-width: 500px; margin: 0 auto; }
+                            .header { 
+                                background: linear-gradient(45deg, #E4405F, #C13584);
+                                color: white;
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                            }
+                            .image-container {
+                                background: white;
+                                padding: 15px;
+                                border-radius: 12px;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                                margin-bottom: 20px;
+                            }
+                            .confession-image {
+                                max-width: 100%;
+                                height: auto;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                transition: transform 0.2s;
+                            }
+                            .confession-image:hover {
+                                transform: scale(1.02);
+                            }
+                            .instructions {
+                                background: white;
+                                padding: 20px;
+                                border-radius: 12px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                                margin-bottom: 20px;
+                                text-align: left;
+                            }
+                            .step {
+                                display: flex;
+                                align-items: center;
+                                margin-bottom: 15px;
+                                padding: 10px;
+                                background: #f8f9fa;
+                                border-radius: 8px;
+                            }
+                            .step-number {
+                                background: #E4405F;
+                                color: white;
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: bold;
+                                font-size: 12px;
+                                margin-right: 12px;
+                                flex-shrink: 0;
+                            }
+                            .buttons {
+                                display: flex;
+                                gap: 10px;
+                                justify-content: center;
+                                flex-wrap: wrap;
+                            }
+                            .btn {
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                text-decoration: none;
+                                display: inline-block;
+                                transition: transform 0.2s;
+                            }
+                            .btn:hover { transform: translateY(-1px); }
+                            .btn-instagram {
+                                background: linear-gradient(45deg, #E4405F, #C13584);
+                                color: white;
+                            }
+                            .btn-download {
+                                background: #28a745;
+                                color: white;
+                            }
+                            .btn-close {
+                                background: #6c757d;
+                                color: white;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <h2 style="margin: 0; margin-bottom: 5px;">📸 Ready for Instagram!</h2>
+                                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Your confession is perfectly sized for Instagram</p>
+                            </div>
+                            
+                            <div class="image-container">
+                                <img src="${image}" class="confession-image" alt="Confession for Instagram" 
+                                     onclick="this.style.transform='scale(1.1)'; setTimeout(() => this.style.transform='scale(1)', 200);" />
+                            </div>
+                            
+                            <div class="instructions">
+                                <h3 style="margin-top: 0; color: #333;">📋 How to share:</h3>
+                                <div class="step">
+                                    <div class="step-number">1</div>
+                                    <div>Right-click the image above and select <strong>"Save image as..."</strong> or <strong>"Copy image"</strong></div>
                                 </div>
-                                
-                                <script>
-                                    function downloadImage() {
-                                        const link = document.createElement('a');
-                                        link.href = '${image}';
-                                        link.download = 'confession-${confessionId}-instagram.png';
-                                        link.click();
-                                    }
-                                </script>
-                            </body>
-                        </html>
-                    `);
+                                <div class="step">
+                                    <div class="step-number">2</div>
+                                    <div>Open Instagram (web or app) and create a new post</div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">3</div>
+                                    <div>Upload the saved image or paste it directly (Ctrl+V / Cmd+V)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="buttons">
+                                <a href="https://www.instagram.com/" target="_blank" class="btn btn-instagram">
+                                    Open Instagram
+                                </a>
+                                <button onclick="downloadImage()" class="btn btn-download">
+                                    Download Image
+                                </button>
+                                <button onclick="window.close()" class="btn btn-close">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <script>
+                            function downloadImage() {
+                                const link = document.createElement('a');
+                                link.href = '${image}';
+                                link.download = 'confession-${confessionId}-instagram.png';
+                                link.click();
+                            }
+                        </script>
+                    </body>
+                </html>
+            `);
                 }
             } else {
                 // Regular save for non-Instagram shares
@@ -290,8 +301,18 @@ export default function AdminPage() {
                 link.click();
             }
         } catch (error) {
+            // Clean up wrapper if it still exists
+            const wrapper = document.querySelector('div');
+            if (wrapper && document.body.contains(wrapper)) {
+                try {
+                    document.body.removeChild(wrapper);
+                } catch (cleanupError) {
+                    console.log('Cleanup error:', cleanupError);
+                }
+            }
+
             console.error('Image generation failed:', error);
-            alert('Failed to create image. Please try again.');
+            alert('Image generation failed on this device. Please try using a desktop browser or different device.');
         }
     };
 
@@ -313,8 +334,8 @@ export default function AdminPage() {
         if (toArchive) {
             setArchivedConfessions(prev => [...prev, toArchive]);
             setConfessions(prev => prev.filter((conf) => conf._id !== id));
-            setStats(prev => ({ 
-                ...prev, 
+            setStats(prev => ({
+                ...prev,
                 total: prev.total - 1,
                 unread: toArchive.isRead ? prev.unread : prev.unread - 1
             }));
@@ -326,8 +347,8 @@ export default function AdminPage() {
         if (toUnarchive) {
             setConfessions(prev => [...prev, toUnarchive]);
             setArchivedConfessions(prev => prev.filter((conf) => conf._id !== id));
-            setStats(prev => ({ 
-                ...prev, 
+            setStats(prev => ({
+                ...prev,
                 total: prev.total + 1,
                 unread: toUnarchive.isRead ? prev.unread : prev.unread + 1
             }));
@@ -701,7 +722,7 @@ export default function AdminPage() {
                         <button
                             onClick={() => setConfessionSizes(prev => ({
                                 ...prev,
-                                [confession._id]: { width: 500, height:300 }
+                                [confession._id]: { width: 500, height: 300 }
                             }))}
                             style={{
                                 background: '#dc3545',
@@ -713,31 +734,31 @@ export default function AdminPage() {
                                 cursor: 'pointer'
                             }}
                         >
-                        Proper
+                            Proper
                         </button>
-<button
-    onClick={() => setConfessionSizes(prev => ({
-        ...prev,
-        [confession._id]: { width: 600, height: 800 }
-    }))}
-    style={{
-        background: '#dc3545',
-        color: 'white',
-        border: 'none',
-        padding: '6px 12px',
-        borderRadius: '4px',
-        fontSize: '12px',
-        cursor: 'pointer'
-    }}
->
-    Long Text
-</button>
+                        <button
+                            onClick={() => setConfessionSizes(prev => ({
+                                ...prev,
+                                [confession._id]: { width: 600, height: 800 }
+                            }))}
+                            style={{
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Long Text
+                        </button>
 
 
-                        
+
                     </div>
                 </div>
-                
+
                 {/* Enhanced Confession Box */}
                 <div
                     className="card"
@@ -747,12 +768,12 @@ export default function AdminPage() {
                         opacity: confession.isRead ? 0.85 : 1,
                         borderRadius: '16px',
                         padding: '25px',
-                        background: isArchived 
-                            ? '#f8f9fa' 
+                        background: isArchived
+                            ? '#f8f9fa'
                             : '#ffffff',
                         color: '#2c3e50',
-                        boxShadow: confession.isRead 
-                            ? '0 8px 25px rgba(0,0,0,0.1)' 
+                        boxShadow: confession.isRead
+                            ? '0 8px 25px rgba(0,0,0,0.1)'
                             : '0 12px 35px rgba(255,107,107,0.2), 0 4px 15px rgba(0,0,0,0.1)',
                         display: 'flex',
                         flexDirection: 'column',
@@ -826,7 +847,7 @@ export default function AdminPage() {
                         </span>
                         {confession.content}
                     </div>
-                    
+
                     <div style={{
                         background: 'linear-gradient(45deg, #667eea, #764ba2)',
                         WebkitBackgroundClip: 'text',
@@ -844,7 +865,7 @@ export default function AdminPage() {
                     }}>
                         GSS Confession
                     </div>
-                    
+
                     {isArchived && (
                         <div style={{
                             position: 'absolute',
@@ -888,7 +909,7 @@ export default function AdminPage() {
                             Mark as Read
                         </button>
                     )}
-                    
+
                     <button
                         onClick={() => shareConfessionAsImage(confession._id)}
                         style={{
@@ -1297,8 +1318,8 @@ export default function AdminPage() {
 
                 {currentView === 'archive' && (
                     <div>
-                        <h2 style={{ 
-                            color: '#333', 
+                        <h2 style={{
+                            color: '#333',
                             marginBottom: '20px',
                             fontSize: '1.5rem'
                         }}>

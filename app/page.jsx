@@ -489,16 +489,7 @@ export default function HomePage() {
               Global Science Confession 2025
             </h1>
 
-            <p style={{
-              color: 'rgba(255,255,255,0.8)',
-              fontSize: 'clamp(12px, 3vw, 14px)',
-              marginBottom: '20px',
-              fontWeight: 'bold',
-              textDecoration: 'underline',
-            }}>
-              Powered by{' '}
-              Hamro eShop
-            </p>
+            
 
             <p style={{
               fontSize: 'clamp(14px, 3.5vw, 16px)',
@@ -580,14 +571,7 @@ export default function HomePage() {
               padding: 'clamp(15px, 4vw, 20px)',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                fontSize: 'clamp(14px, 3.5vw, 16px)',
-                marginBottom: '10px'
-              }}>
-                Powered & Developed by{' '}
-                Hamro eShop
-              </p>
+              
             </div>
           </div>
         </div>
