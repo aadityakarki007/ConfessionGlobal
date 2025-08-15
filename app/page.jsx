@@ -509,7 +509,7 @@ export default function HomePage() {
             </h1>
 
             <p style={{
-              fontSize: 'clamp(14px, 3.5vw, 16px)',
+              fontSize: 'clamp(12px, 3.5vw, 15px)',
               color: 'rgba(255,255,255,0.9)',
               maxWidth: '600px',
               margin: '0 auto',
