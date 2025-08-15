@@ -614,7 +614,9 @@ export default function AdminPage() {
                     gap: '15px',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    fontSize: '12px'
+                    fontSize: '12px',
+                     width: '800px',  // Add this line - change to whatever width you want
+                     maxWidth: '100%' // Optional: to ensure it doesn't overflow on smaller screens
                 }}>
                     <span style={{ fontWeight: '500', color: '#666' }}>
                         Size Controls:
@@ -722,6 +724,42 @@ export default function AdminPage() {
                         >
                             Mid
                         </button>
+                        <button
+                            onClick={() => setConfessionSizes(prev => ({
+                                ...prev,
+                                [confession._id]: { width: 500, height: 300 }
+                            }))}
+                            style={{
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '3px',
+                                fontSize: '10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Proper-3
+                        </button>
+
+                        <button
+                            onClick={() => setConfessionSizes(prev => ({
+                                ...prev,
+                                [confession._id]: { width: 400, height: 250 }
+                            }))}
+                            style={{
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '3px',
+                                fontSize: '10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Proper-2
+                        </button>
+
                         <button
                             onClick={() => setConfessionSizes(prev => ({
                                 ...prev,

@@ -3,7 +3,7 @@
 const bcrypt = require('bcryptjs');
 
 async function hashPassword() {
-    const password = '@gssconfess12..'; // Your admin password
+    const password = '@globalconfess12..'; // Your admin password
     const saltRounds = 12;
     
     try {
