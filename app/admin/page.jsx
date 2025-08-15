@@ -85,6 +85,7 @@ export default function AdminPage() {
             }
 
 
+
             
             // Add this check for iOS
             if (canvas.width === 0 || canvas.height === 0) {

@@ -6,6 +6,7 @@ export default function HomePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
@@ -53,7 +54,12 @@ export default function HomePage() {
 
   for (let name of forbiddenNames) {
     if (lowerConfession.includes(name)) {
-      setMessage("Sorry, you can't mention this.");
+      setMessage("Sorry, you can't confess this. Invalid confession!");
+      setShowErrorPopup(true);
+      setTimeout(() => {
+        setShowErrorPopup(false);
+        setMessage('');
+      }, 3000);
       return;
     }
   }
@@ -346,20 +352,33 @@ export default function HomePage() {
           }
         }
 
-        .error {
-          background: rgba(244, 67, 54, 0.2);
-          color: #f44336;
-          padding: 15px;
+        .error-popup {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #f44336;
+          color: white;
+          padding: 12px 20px;
           border-radius: 8px;
-          margin: 15px 0;
-          border: 1px solid rgba(244, 67, 54, 0.3);
+          font-size: 14px;
+          font-weight: 500;
+          z-index: 2000;
+          border: 2px solid #d32f2f;
+          box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+          animation: slideInRight 0.3s ease-out;
+          white-space: nowrap;
         }
 
         @media (max-width: 480px) {
-          .error {
-            padding: 12px;
-            margin: 12px 0;
-            font-size: 14px;
+          .error-popup {
+            top: 15px;
+            right: 15px;
+            left: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            font-size: 13px;
+            white-space: normal;
+            text-align: center;
           }
         }
 
@@ -489,8 +508,6 @@ export default function HomePage() {
               Global Science Confession 2025
             </h1>
 
-           
-
             <p style={{
               fontSize: 'clamp(14px, 3.5vw, 16px)',
               color: 'rgba(255,255,255,0.9)',
@@ -500,6 +517,17 @@ export default function HomePage() {
             }}>
               Share your thoughts, feelings, and secrets in a safe, anonymous space.
               Your identity will never be revealed.
+            </p>
+
+            <p style={{
+              fontSize: 'clamp(12px, 3vw, 14px)',
+              color: 'rgba(255,255,255,0.7)',
+              maxWidth: '600px',
+              margin: '10px auto 0',
+              padding: '0 10px',
+              fontStyle: 'italic'
+            }}>
+              ⚠️ Note: Certain names may be banned for privacy, security, or safety reasons.
             </p>
           </div>
 
@@ -519,7 +547,7 @@ export default function HomePage() {
                   <label className="form-label">Your Confession</label>
                   <textarea
                     className="form-input form-textarea"
-                    placeholder="Share what's on your mind... (max  characters)"
+                    placeholder="Share what's on your mind... (max 1500 characters)"
                     value={confession}
                     onChange={(e) => setConfession(e.target.value)}
                     maxLength={1500}
@@ -535,8 +563,8 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {message && (
-                  <div className={message.includes('submitted') ? 'success' : 'error'}>
+                {message && message.includes('submitted') && (
+                  <div className="success">
                     {message}
                   </div>
                 )}
@@ -571,7 +599,6 @@ export default function HomePage() {
               padding: 'clamp(15px, 4vw, 20px)',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
-             
             </div>
           </div>
         </div>
@@ -580,6 +607,13 @@ export default function HomePage() {
         {showSuccessPopup && (
           <div className="success-popup">
             ✅ Confession submitted successfully!
+          </div>
+        )}
+
+        {/* Error Popup */}
+        {showErrorPopup && (
+          <div className="error-popup">
+            Sorry, you can't confess this. Invalid confession!
           </div>
         )}
 
@@ -618,5 +652,3 @@ export default function HomePage() {
     </>
   );
 }
-
-//haha
