@@ -49,7 +49,6 @@ export default function HomePage() {
   }
 
   // Name filter check (case insensitive)
-  const forbiddenNames = ['subhekshya', 'subekshya', 'suvekshya'];
   const lowerConfession = confession.toLowerCase();
 
   for (let name of forbiddenNames) {
