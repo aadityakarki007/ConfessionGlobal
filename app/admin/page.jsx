@@ -86,7 +86,7 @@ export default function AdminPage() {
 
 
 
-            
+
             // Add this check for iOS
             if (canvas.width === 0 || canvas.height === 0) {
                 throw new Error('Canvas rendering failed - invalid dimensions');
@@ -615,8 +615,8 @@ export default function AdminPage() {
                     alignItems: 'center',
                     flexWrap: 'wrap',
                     fontSize: '12px',
-                     width: '800px',  // Add this line - change to whatever width you want
-                     maxWidth: '100%' // Optional: to ensure it doesn't overflow on smaller screens
+                    width: '800px',  // Add this line - change to whatever width you want
+                    maxWidth: '100%' // Optional: to ensure it doesn't overflow on smaller screens
                 }}>
                     <span style={{ fontWeight: '500', color: '#666' }}>
                         Size Controls:
@@ -809,9 +809,7 @@ export default function AdminPage() {
                         opacity: confession.isRead ? 0.85 : 1,
                         borderRadius: '16px',
                         padding: '25px',
-                        background: isArchived
-                            ? '#f8f9fa'
-                            : '#ffffff',
+                        background: isArchived ? '#f8f9fa' : '#ffffff',
                         color: '#2c3e50',
                         boxShadow: confession.isRead
                             ? '0 8px 25px rgba(0,0,0,0.1)'
@@ -823,108 +821,122 @@ export default function AdminPage() {
                         resize: 'both',
                         overflow: 'auto',
                         minWidth: '250px',
-                        minHeight: '100px',
+                        minHeight: '120px',
                         maxWidth: '100%',
                         width: `${currentSize.width}px`,
                         height: `${currentSize.height}px`,
                         boxSizing: 'border-box',
                         transition: 'all 0.3s ease',
                         transform: confession.isRead ? 'scale(0.98)' : 'scale(1)',
-                        backgroundImage: 'none',
+                        fontFamily: '"Poppins", "Inter", "Segoe UI", "Roboto", sans-serif', // modern font
                     }}
                 >
                     {/* Header: Anonymous + Date */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        fontSize: '13px',
-                        color: '#7f8c8d',
-                        flexShrink: 0,
-                        fontWeight: '500',
-                        letterSpacing: '0.5px'
-                    }}>
-                        <span style={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            fontWeight: '600'
-                        }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "13px",
+                            color: "#7f8c8d",
+                            fontWeight: "500",
+                            letterSpacing: "0.4px",
+                        }}
+                    >
+                        <span
+                            style={{
+                                background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                fontWeight: "600",
+                                fontSize: "14px",
+                            }}
+                        >
                             Anonymous
                         </span>
-                        <span style={{
-                            background: '#ecf0f1',
-                            padding: '2px 8px',
-                            borderRadius: '10px',
-                            fontSize: '11px',
-                            color: '#5d6d7e'
-                        }}>
+                        <span
+                            style={{
+                                background: "#f5f7fa",
+                                padding: "3px 10px",
+                                borderRadius: "12px",
+                                fontSize: "11px",
+                                color: "#5d6d7e",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                            }}
+                        >
                             {new Date(confession.createdAt).toLocaleDateString()}
                         </span>
                     </div>
 
                     {/* Confession Text with dot */}
-                    <div style={{
-                        fontWeight: '500',
-                        fontSize: '17px',
-                        lineHeight: '1.7',
-                        flex: 1,
-                        overflow: 'auto',
-                        fontFamily: '"Inter", "Segoe UI", "Roboto", sans-serif',
-                        color: '#34495e',
-                        textAlign: 'left',
-                        letterSpacing: '0.3px',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                    }}>
-                        <span style={{
-                            color: '#e74c3c',
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            marginRight: '8px',
-                            display: 'inline-block',
-                            transform: 'translateY(2px)'
-                        }}>
+                    <div
+                        style={{
+                            fontWeight: "500",
+                            fontSize: "17px",
+                            lineHeight: "1.7",
+                            flex: 1,
+                            overflow: "auto",
+                            color: "#2d3436",
+                            textAlign: "left",
+                            letterSpacing: "0.2px",
+                        }}
+                    >
+                        <span
+                            style={{
+                                color: "#ff4757",
+                                fontSize: "22px",
+                                fontWeight: "bold",
+                                marginRight: "10px",
+                                display: "inline-block",
+                                transform: "translateY(3px)",
+                            }}
+                        >
                             •
                         </span>
                         {confession.content}
                     </div>
 
-                    <div style={{
-                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontSize: '13px',
-                        position: 'absolute',
-                        bottom: '15px',
-                        left: '25px',
-                        fontWeight: '700',
-                        opacity: 0.9,
-                        pointerEvents: 'none',
-                        fontFamily: '"Inter", "Segoe UI", "Roboto", sans-serif',
-                        letterSpacing: '1px',
-                        textShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                    }}>
+                    {/* Footer Label */}
+                    <div
+                        style={{
+                            background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            fontSize: "12px",
+                            position: "absolute",
+                            bottom: "16px",
+                            left: "28px",
+                            fontWeight: "700",
+                            opacity: 0.9,
+                            pointerEvents: "none",
+                            letterSpacing: "1px",
+                        }}
+                    >
                         GSS Confession
                     </div>
 
+                    {/* Archived Label */}
                     {isArchived && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '15px',
-                            right: '15px',
-                            background: 'linear-gradient(45deg, #f39c12, #e67e22)',
-                            color: 'white',
-                            padding: '4px 10px',
-                            borderRadius: '12px',
-                            fontSize: '10px',
-                            fontWeight: '700',
-                            letterSpacing: '0.5px',
-                            boxShadow: '0 2px 8px rgba(243, 156, 18, 0.3)'
-                        }}>
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "16px",
+                                right: "16px",
+                                background: "linear-gradient(45deg, #f39c12, #e67e22)",
+                                color: "white",
+                                padding: "5px 12px",
+                                borderRadius: "14px",
+                                fontSize: "10px",
+                                fontWeight: "700",
+                                letterSpacing: "0.5px",
+                                boxShadow: "0 2px 8px rgba(243, 156, 18, 0.3)",
+                            }}
+                        >
                             ARCHIVED
                         </div>
                     )}
                 </div>
+
 
                 {/* Buttons outside the box */}
                 <div style={{

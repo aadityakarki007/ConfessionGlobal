@@ -9,6 +9,8 @@ export default function HomePage() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const forbiddenNames = [];
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -526,7 +528,7 @@ export default function HomePage() {
               padding: '0 10px',
               fontStyle: 'italic'
             }}>
-              ⚠️ Note: Certain names may be banned for privacy, security, or safety reasons.
+              ⚠️ Note : No names are banned for now!
             </p>
           </div>
 
