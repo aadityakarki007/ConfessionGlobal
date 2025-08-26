@@ -528,7 +528,7 @@ export default function HomePage() {
               padding: '0 10px',
               fontStyle: 'italic'
             }}>
-              ⚠️ Note : No names are banned for now!
+              ⚠️ Note : No names are banned for now! 
             </p>
           </div>
 
