@@ -2,7 +2,7 @@ import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata = {
-  title: 'Anonymous Confessions',
+  title: 'Global Gss Confession',
   description: 'Share your thoughts anonymously',
 }
 
