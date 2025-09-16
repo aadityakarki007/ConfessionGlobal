@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^4.29.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.1",
     "html2canvas": "^1.4.1",

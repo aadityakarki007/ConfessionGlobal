@@ -1,4 +1,5 @@
 import './globals.css'
+import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata = {
   title: 'Anonymous Confessions',
@@ -7,8 +8,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
