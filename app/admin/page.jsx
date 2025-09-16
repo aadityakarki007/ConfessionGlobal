@@ -9,11 +9,327 @@ import html2canvas from 'html2canvas';
 
 export default function AdminPage() {
 
+    const shareConfessionAsImage = async (confessionId, isInstagram = false) => {
+        const confessionElement = document.getElementById(`confession-${confessionId}`);
+        if (!confessionElement) return;
+
+        try {
+            // Clone element into a new wrapper with Instagram-optimized styling if needed
+            const wrapper = document.createElement('div');
+
+            if (isInstagram) {
+                // Instagram optimal styling
+                wrapper.style.backgroundColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                wrapper.style.padding = '40px';
+                wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.justifyContent = 'center';
+                wrapper.style.width = '1080px';
+                wrapper.style.height = '1080px';
+                wrapper.style.boxSizing = 'border-box';
+            } else {
+                wrapper.style.backgroundColor = 'white';
+                wrapper.style.padding = '20px';
+                wrapper.style.display = 'inline-block';
+            }
+
+            const clonedElement = confessionElement.cloneNode(true);
+            if (isInstagram) {
+                clonedElement.style.maxWidth = '800px';
+                clonedElement.style.maxHeight = '800px';
+                clonedElement.style.margin = 'auto';
+            }
+
+            // Fix gradient text issues for image generation
+            // Find all elements with gradient text styling and convert to solid color
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach(element => {
+                const computedStyle = window.getComputedStyle(element);
+                // Check if element has WebkitBackgroundClip: text
+                if (element.style.WebkitBackgroundClip === 'text' ||
+                    element.style.webkitBackgroundClip === 'text' ||
+                    computedStyle.webkitBackgroundClip === 'text') {
+
+                    // Remove gradient and set solid color
+                    element.style.background = 'none';
+                    element.style.WebkitBackgroundClip = 'unset';
+                    element.style.webkitBackgroundClip = 'unset';
+                    element.style.WebkitTextFillColor = '#667eea';
+                    element.style.webkitTextFillColor = '#667eea';
+                    element.style.color = '#667eea';
+                }
+
+                // Also check for background gradient and transparent text
+                if ((element.style.background && element.style.background.includes('gradient')) &&
+                    (element.style.WebkitTextFillColor === 'transparent' ||
+                        element.style.webkitTextFillColor === 'transparent')) {
+                    element.style.background = 'none';
+                    element.style.WebkitTextFillColor = '#667eea';
+                    element.style.webkitTextFillColor = '#667eea';
+                    element.style.color = '#667eea';
+                }
+            });
+
+            wrapper.appendChild(clonedElement);
+            document.body.appendChild(wrapper);
+
+            const canvas = await html2canvas(wrapper, {
+                backgroundColor: isInstagram ? '#667eea' : '#ffffff',
+                useCORS: true,
+                allowTaint: true,
+                scale: window.devicePixelRatio || 1,
+                width: isInstagram ? 1080 : undefined,
+                height: isInstagram ? 1080 : undefined,
+                logging: false,
+                removeContainer: true
+            });
+
+            // Clean up wrapper first
+            if (document.body.contains(wrapper)) {
+                document.body.removeChild(wrapper);
+            }
+
+
+
+
+            // Add this check for iOS
+            if (canvas.width === 0 || canvas.height === 0) {
+                throw new Error('Canvas rendering failed - invalid dimensions');
+            }
+
+            if (isInstagram) {
+                let shareSuccess = false;
+
+                // Method 1: Try Web Share API (works best on mobile)
+                if (navigator.share && 'canShare' in navigator) {
+                    try {
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                        const file = new File([blob], `confession-${confessionId}-instagram.png`, { type: 'image/png' });
+
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Global Confession',
+                                text: 'Check out this confession!'
+                            });
+                            shareSuccess = true;
+                        }
+                    } catch (shareError) {
+                        console.log('Web Share API failed:', shareError.message);
+                    }
+                }
+
+                // Method 2: Try clipboard (only if Web Share failed and user grants permission)
+                if (!shareSuccess && navigator.clipboard && window.ClipboardItem) {
+                    try {
+                        // First check if we can write to clipboard
+                        const permissionStatus = await navigator.permissions.query({ name: 'clipboard-write' });
+
+                        if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+                            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+
+                            alert('✅ Image copied to clipboard!\n\nNow you can:\n1. Open Instagram\n2. Create a new post\n3. Paste the image (Ctrl+V or Cmd+V)');
+
+                            // Open Instagram in new tab
+                            window.open('https://www.instagram.com/', '_blank');
+                            shareSuccess = true;
+                        }
+                    } catch (clipboardError) {
+                        console.log('Clipboard write failed:', clipboardError.message);
+                    }
+                }
+
+                // Method 3: Fallback - Show image with instructions
+                if (!shareSuccess) {
+                    const image = canvas.toDataURL('image/png');
+
+                    // Create a better sharing interface
+                    const shareWindow = window.open('', '_blank', 'width=600,height=700,scrollbars=yes');
+                    shareWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                        <head>
+                            <title>Share to Instagram - GSS Confession</title>
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                            <style>
+                                body { 
+                                    margin: 0; 
+                                    padding: 20px; 
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                    background: #f8f9fa;
+                                    text-align: center;
+                                }
+                                .container { max-width: 500px; margin: 0 auto; }
+                                .header { 
+                                    background: linear-gradient(45deg, #E4405F, #C13584);
+                                    color: white;
+                                    padding: 20px;
+                                    border-radius: 12px;
+                                    margin-bottom: 20px;
+                                }
+                                .image-container {
+                                    background: white;
+                                    padding: 15px;
+                                    border-radius: 12px;
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                                    margin-bottom: 20px;
+                                }
+                                .confession-image {
+                                    max-width: 100%;
+                                    height: auto;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    transition: transform 0.2s;
+                                }
+                                .confession-image:hover {
+                                    transform: scale(1.02);
+                                }
+                                .instructions {
+                                    background: white;
+                                    padding: 20px;
+                                    border-radius: 12px;
+                                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                                    margin-bottom: 20px;
+                                    text-align: left;
+                                }
+                                .step {
+                                    display: flex;
+                                    align-items: center;
+                                    margin-bottom: 15px;
+                                    padding: 10px;
+                                    background: #f8f9fa;
+                                    border-radius: 8px;
+                                }
+                                .step-number {
+                                    background: #E4405F;
+                                    color: white;
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: bold;
+                                    font-size: 12px;
+                                    margin-right: 12px;
+                                    flex-shrink: 0;
+                                }
+                                .buttons {
+                                    display: flex;
+                                    gap: 10px;
+                                    justify-content: center;
+                                    flex-wrap: wrap;
+                                }
+                                .btn {
+                                    padding: 12px 24px;
+                                    border: none;
+                                    border-radius: 8px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                    text-decoration: none;
+                                    display: inline-block;
+                                    transition: transform 0.2s;
+                                }
+                                .btn:hover { transform: translateY(-1px); }
+                                .btn-instagram {
+                                    background: linear-gradient(45deg, #E4405F, #C13584);
+                                    color: white;
+                                }
+                                .btn-download {
+                                    background: #28a745;
+                                    color: white;
+                                }
+                                .btn-close {
+                                    background: #6c757d;
+                                    color: white;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="header">
+                                    <h2 style="margin: 0; margin-bottom: 5px;">📸 Ready for Instagram!</h2>
+                                    <p style="margin: 0; opacity: 0.9; font-size: 14px;">Your confession is perfectly sized for Instagram</p>
+                                </div>
+                                
+                                <div class="image-container">
+                                    <img src="${image}" class="confession-image" alt="Confession for Instagram" 
+                                         onclick="this.style.transform='scale(1.1)'; setTimeout(() => this.style.transform='scale(1)', 200);" />
+                                </div>
+                                
+                                <div class="instructions">
+                                    <h3 style="margin-top: 0; color: #333;">📋 How to share:</h3>
+                                    <div class="step">
+                                        <div class="step-number">1</div>
+                                        <div>Right-click the image above and select <strong>"Save image as..."</strong> or <strong>"Copy image"</strong></div>
+                                    </div>
+                                    <div class="step">
+                                        <div class="step-number">2</div>
+                                        <div>Open Instagram (web or app) and create a new post</div>
+                                    </div>
+                                    <div class="step">
+                                        <div class="step-number">3</div>
+                                        <div>Upload the saved image or paste it directly (Ctrl+V / Cmd+V)</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="buttons">
+                                    <a href="https://www.instagram.com/" target="_blank" class="btn btn-instagram">
+                                        Open Instagram
+                                    </a>
+                                    <button onclick="downloadImage()" class="btn btn-download">
+                                        Download Image
+                                    </button>
+                                    <button onclick="window.close()" class="btn btn-close">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <script>
+                                function downloadImage() {
+                                    const link = document.createElement('a');
+                                    link.href = '${image}';
+                                    link.download = 'confession-${confessionId}-instagram.png';
+                                    link.click();
+                                }
+                            </script>
+                        </body>
+                    </html>
+                `);
+                }
+            } else {
+                // Regular save for non-Instagram shares
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = `confession-${confessionId}.png`;
+                link.click();
+            }
+        } catch (error) {
+            // Clean up wrapper if it still exists
+            const wrapper = document.querySelector('div');
+            if (wrapper && document.body.contains(wrapper)) {
+                try {
+                    document.body.removeChild(wrapper);
+                } catch (cleanupError) {
+                    console.log('Cleanup error:', cleanupError);
+                }
+            }
+
+            console.error('Image generation failed:', error);
+            alert('Image generation failed on this device. Please try using a desktop browser or different device.');
+        }
+    };
+
+
     // ADD THESE LINES
     const { isLoaded, isSignedIn, user } = useUser();
     const { signOut } = useAuth();
     const router = useRouter();
-   
+
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [archivedConfessions, setArchivedConfessions] = useState([]);
     const [loginForm, setLoginForm] = useState({ username: '', password: '' });
@@ -25,7 +341,7 @@ export default function AdminPage() {
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('all');
     const [currentView, setCurrentView] = useState('main');
-    
+
     const [confessionSizes, setConfessionSizes] = useState({});
 
     const handleArchive = (id) => {
@@ -54,33 +370,33 @@ export default function AdminPage() {
         }
     };
     useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
-        console.log('User loaded:', user);
-        console.log('Public metadata:', user.publicMetadata);
-        console.log('Roles:', user.publicMetadata?.roles);
-        
-        const userRoles = user.publicMetadata?.roles || [];
-        console.log('Has confess role:', userRoles.includes('confess'));
-        
-        if (!userRoles.includes('confess')) {
-            console.log('Access denied - no confess role');
-            // Don't redirect yet, let's see what's happening
-        } else {
-            console.log('Access granted - has confess role');
+        if (isLoaded && isSignedIn && user) {
+            console.log('User loaded:', user);
+            console.log('Public metadata:', user.publicMetadata);
+            console.log('Roles:', user.publicMetadata?.roles);
+
+            const userRoles = user.publicMetadata?.roles || [];
+            console.log('Has confess role:', userRoles.includes('confess'));
+
+            if (!userRoles.includes('confess')) {
+                console.log('Access denied - no confess role');
+                // Don't redirect yet, let's see what's happening
+            } else {
+                console.log('Access granted - has confess role');
+            }
         }
-    }
-}, [isLoaded, isSignedIn, user, router]);
+    }, [isLoaded, isSignedIn, user, router]);
 
 
     useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
-        const userRoles = user.publicMetadata?.roles || [];
-        if (!userRoles.includes('confess')) {
-            router.push('/');
-            return;
+        if (isLoaded && isSignedIn && user) {
+            const userRoles = user.publicMetadata?.roles || [];
+            if (!userRoles.includes('confess')) {
+                router.push('/');
+                return;
+            }
         }
-    }
-}, [isLoaded, isSignedIn, user, router]);
+    }, [isLoaded, isSignedIn, user, router]);
 
     useEffect(() => {
         checkAuthStatus();
@@ -702,7 +1018,7 @@ export default function AdminPage() {
                         Save as Image
                     </button>
 
-                  
+
 
                     {isArchived ? (
                         <button
@@ -774,10 +1090,48 @@ export default function AdminPage() {
 
     // Login Form
     // ADD CLERK CHECKS FIRST
-// FIRST: Check if user is signed into Clerk but doesn't have role
-if (isLoaded && isSignedIn) {
-    const userRoles = user?.publicMetadata?.roles || [];
-    if (!userRoles.includes('confess')) {
+    // FIRST: Check if user is signed into Clerk but doesn't have role
+    if (isLoaded && isSignedIn) {
+        const userRoles = user?.publicMetadata?.roles || [];
+        if (!userRoles.includes('confess')) {
+            return (
+                <div style={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '40px',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                        textAlign: 'center'
+                    }}>
+                        <h2>Access Denied</h2>
+                        <p>You don't have permission to access this page.</p>
+                        <button
+                            onClick={() => signOut()}
+                            style={{
+                                background: '#667eea',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    // SECOND: Show Clerk sign-in if not signed in at all
+    if (isLoaded && !isSignedIn) {
         return (
             <div style={{
                 minHeight: '100vh',
@@ -791,53 +1145,15 @@ if (isLoaded && isSignedIn) {
                     padding: '40px',
                     borderRadius: '12px',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                    textAlign: 'center'
                 }}>
-                    <h2>Access Denied</h2>
-                    <p>You don't have permission to access this page.</p>
-                    <button 
-                        onClick={() => signOut()}
-                        style={{
-                            background: '#667eea',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '6px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Sign Out
-                    </button>
+                    <SignIn routing="hash" />
                 </div>
             </div>
         );
     }
-}
 
-// SECOND: Show Clerk sign-in if not signed in at all
-if (isLoaded && !isSignedIn) {
-    return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-        }}>
-            <div style={{
-                background: 'white',
-                padding: '40px',
-                borderRadius: '12px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-            }}>
-               <SignIn routing="hash" />
-            </div>
-        </div>
-    );
-}
-
-// THIRD: Your existing admin login form
-if (!isAuthenticated) {
+    // THIRD: Your existing admin login form
+    if (!isAuthenticated) {
         return (
             <div style={{
                 minHeight: '100vh',
@@ -998,50 +1314,50 @@ if (!isAuthenticated) {
                         }}>
                             Admin Dashboard
                         </h1>
-                       <div style={{ display: 'flex', gap: '10px' }}>
-    <button
-        onClick={handleLogout}
-        style={{
-            background: 'rgba(255,255,255,0.2)',
-            color: 'white',
-            border: '1px solid rgba(255,255,255,0.3)',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            transition: 'all 0.3s'
-        }}
-        onMouseOver={(e) => {
-            e.target.style.background = 'rgba(255,255,255,0.3)';
-        }}
-        onMouseOut={(e) => {
-            e.target.style.background = 'rgba(255,255,255,0.2)';
-        }}
-    >
-        Admin Logout
-    </button>
-    <button
-        onClick={() => signOut()}
-        style={{
-            background: 'rgba(255,0,0,0.2)',
-            color: 'white',
-            border: '1px solid rgba(255,255,255,0.3)',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            transition: 'all 0.3s'
-        }}
-        onMouseOver={(e) => {
-            e.target.style.background = 'rgba(255,0,0,0.3)';
-        }}
-        onMouseOut={(e) => {
-            e.target.style.background = 'rgba(255,0,0,0.2)';
-        }}
-    >
-        Sign Out ({user?.firstName})
-    </button>
-</div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)',
+                                    color: 'white',
+                                    border: '1px solid rgba(255,255,255,0.3)',
+                                    padding: '8px 16px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.3)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.2)';
+                                }}
+                            >
+                                Admin Logout
+                            </button>
+                            <button
+                                onClick={() => signOut()}
+                                style={{
+                                    background: 'rgba(255,0,0,0.2)',
+                                    color: 'white',
+                                    border: '1px solid rgba(255,255,255,0.3)',
+                                    padding: '8px 16px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.target.style.background = 'rgba(255,0,0,0.3)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.target.style.background = 'rgba(255,0,0,0.2)';
+                                }}
+                            >
+                                Sign Out ({user?.firstName})
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
