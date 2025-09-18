@@ -1,15 +1,12 @@
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs/server";
+import { authMiddleware } from '@clerk/nextjs/server'
 
 export default authMiddleware({
-  publicRoutes: ["/", "/sign-in/*"], // these routes are open
-  afterAuth(auth, req) {
-    // Only protect admin routes
-    if (req.nextUrl.pathname.startsWith("/admin")) {
-      if (!auth.user || auth.user.publicMetadata.role !== "confess") {
-        return redirectToSignIn(); // not allowed → redirect
-      }
-    }
-  },
-});
+  publicRoutes: ["/", "/((?!admin).*)"], // Everything except admin routes
+})
 
-export const config = { matcher: ["/admin/:path*"] }; // only applies to admin paths
+export const config = {
+  matcher: [
+    "/admin/(.*)",  // Only match admin routes
+    "/(api|trpc)(.*)" // And API routes if needed
+  ],
+}
