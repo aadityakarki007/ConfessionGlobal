@@ -17,7 +17,21 @@ export default function AdminPage() {
             // Clone element into a new wrapper with Instagram-optimized styling if needed
             const wrapper = document.createElement('div');
 
-
+            if (isInstagram) {
+                // Instagram optimal styling
+                wrapper.style.backgroundColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                wrapper.style.padding = '40px';
+                wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.justifyContent = 'center';
+                wrapper.style.width = '1080px';
+                wrapper.style.height = '1080px';
+                wrapper.style.boxSizing = 'border-box';
+            } else {
+                wrapper.style.backgroundColor = 'white';
+                wrapper.style.padding = '20px';
+                wrapper.style.display = 'inline-block';
+            }
 
             const clonedElement = confessionElement.cloneNode(true);
             if (isInstagram) {
@@ -95,7 +109,7 @@ export default function AdminPage() {
                         if (navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
-                                title: 'Global Gss Confession',
+                                title: 'Global Confession',
                                 text: 'Check out this confession!'
                             });
                             shareSuccess = true;
@@ -854,8 +868,9 @@ export default function AdminPage() {
                         boxSizing: 'border-box',
                         transition: 'all 0.3s ease',
                         transform: confession.isRead ? 'scale(0.98)' : 'scale(1)',
-                        fontFamily:
-                            'var(--font-poppins), var(--font-noto-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+
+                        // 👇 Font upgrade
+                        fontFamily: 'var(--font-poppins), var(--font-noto-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                         fontSize: '17px',
                         fontWeight: '500',
                         lineHeight: '1.6',
@@ -875,7 +890,7 @@ export default function AdminPage() {
                             alignItems: "center",
                             fontSize: "13px",
                             color: "#7f8c8d",
-                            fontWeight: "600",
+                            fontWeight: "500",
                             letterSpacing: "0.4px",
                         }}
                     >
@@ -905,6 +920,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Confession Text with dot */}
+                    {/* Confession Text with dot */}
                     <div
                         style={{
                             fontWeight: "500",
@@ -916,15 +932,13 @@ export default function AdminPage() {
                             textAlign: "left",
                             letterSpacing: "0.2px",
                         }}
-
-                        
                     >
                         {confession.content.split('\n').map((paragraph, index) => (
                             <div key={index} style={{ marginBottom: paragraph.trim() === '' ? '6px' : '2px' }}>
                                 {index === 0 && (
                                     <span
                                         style={{
-                                            color: "#ff4757",
+                                            color: "#dc2626",
                                             fontSize: "22px",
                                             fontWeight: "bold",
                                             marginRight: "10px",
@@ -938,6 +952,7 @@ export default function AdminPage() {
                                 {paragraph}
                             </div>
                         ))}
+
                     </div>
 
                     {/* Footer Label */}
@@ -956,7 +971,7 @@ export default function AdminPage() {
                             letterSpacing: "1px",
                         }}
                     >
-                        Global Gss Confession
+                        GSS Confession
                     </div>
 
                     {/* Archived Label */}
