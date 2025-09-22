@@ -916,6 +916,8 @@ export default function AdminPage() {
                             textAlign: "left",
                             letterSpacing: "0.2px",
                         }}
+
+                        
                     >
                         {confession.content.split('\n').map((paragraph, index) => (
                             <div key={index} style={{ marginBottom: paragraph.trim() === '' ? '6px' : '2px' }}>

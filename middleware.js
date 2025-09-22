@@ -10,3 +10,4 @@ export const config = {
     "/(api|trpc)(.*)" // And API routes if needed
   ],
 }
+
