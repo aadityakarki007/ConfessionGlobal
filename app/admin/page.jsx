@@ -17,21 +17,7 @@ export default function AdminPage() {
             // Clone element into a new wrapper with Instagram-optimized styling if needed
             const wrapper = document.createElement('div');
 
-            if (isInstagram) {
-                // Instagram optimal styling
-                wrapper.style.backgroundColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                wrapper.style.padding = '40px';
-                wrapper.style.display = 'flex';
-                wrapper.style.alignItems = 'center';
-                wrapper.style.justifyContent = 'center';
-                wrapper.style.width = '1080px';
-                wrapper.style.height = '1080px';
-                wrapper.style.boxSizing = 'border-box';
-            } else {
-                wrapper.style.backgroundColor = 'white';
-                wrapper.style.padding = '20px';
-                wrapper.style.display = 'inline-block';
-            }
+
 
             const clonedElement = confessionElement.cloneNode(true);
             if (isInstagram) {
@@ -109,7 +95,7 @@ export default function AdminPage() {
                         if (navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
-                                title: 'Global Confession',
+                                title: 'Global Gss Confession',
                                 text: 'Check out this confession!'
                             });
                             shareSuccess = true;
@@ -845,15 +831,15 @@ export default function AdminPage() {
                     className="card"
                     id={`confession-${confession._id}`}
                     style={{
-                        border: confession.isRead ? 'none' : '3px solid #ff6b6b',
-                        opacity: confession.isRead ? 0.85 : 1,
-                        borderRadius: '16px',
+                        border: confession.isRead ? '1px solid #e5e7eb' : '3px solid #ff6b6b',
+                        opacity: confession.isRead ? 0.9 : 1,
+                        borderRadius: '18px',
                         padding: '25px',
-                        background: isArchived ? '#f8f9fa' : '#ffffff',
-                        color: '#2c3e50',
+                        background: '#ffffff',
+                        color: '#1c1c1c',
                         boxShadow: confession.isRead
-                            ? '0 8px 25px rgba(0,0,0,0.1)'
-                            : '0 12px 35px rgba(255,107,107,0.2), 0 4px 15px rgba(0,0,0,0.1)',
+                            ? '0 8px 20px rgba(0,0,0,0.08)'
+                            : '0 12px 28px rgba(255,107,107,0.25), 0 6px 18px rgba(0,0,0,0.12)',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '15px',
@@ -868,9 +854,19 @@ export default function AdminPage() {
                         boxSizing: 'border-box',
                         transition: 'all 0.3s ease',
                         transform: confession.isRead ? 'scale(0.98)' : 'scale(1)',
-                        fontFamily: '"Poppins", "Inter", "Segoe UI", "Roboto", sans-serif', // modern font
+                        fontFamily:
+                            'var(--font-poppins), var(--font-noto-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        fontSize: '17px',
+                        fontWeight: '500',
+                        lineHeight: '1.6',
+                        letterSpacing: '0.3px',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale',
+                        textRendering: 'optimizeLegibility'
                     }}
                 >
+
+
                     {/* Header: Anonymous + Date */}
                     <div
                         style={{
@@ -879,7 +875,7 @@ export default function AdminPage() {
                             alignItems: "center",
                             fontSize: "13px",
                             color: "#7f8c8d",
-                            fontWeight: "500",
+                            fontWeight: "600",
                             letterSpacing: "0.4px",
                         }}
                     >
@@ -916,24 +912,30 @@ export default function AdminPage() {
                             lineHeight: "1.7",
                             flex: 1,
                             overflow: "auto",
-                            color: "#2d3436",
+                            color: "#1f2937",
                             textAlign: "left",
                             letterSpacing: "0.2px",
                         }}
                     >
-                        <span
-                            style={{
-                                color: "#ff4757",
-                                fontSize: "22px",
-                                fontWeight: "bold",
-                                marginRight: "10px",
-                                display: "inline-block",
-                                transform: "translateY(3px)",
-                            }}
-                        >
-                            •
-                        </span>
-                        {confession.content}
+                        {confession.content.split('\n').map((paragraph, index) => (
+                            <div key={index} style={{ marginBottom: paragraph.trim() === '' ? '6px' : '2px' }}>
+                                {index === 0 && (
+                                    <span
+                                        style={{
+                                            color: "#ff4757",
+                                            fontSize: "22px",
+                                            fontWeight: "bold",
+                                            marginRight: "10px",
+                                            display: "inline-block",
+                                            transform: "translateY(3px)",
+                                        }}
+                                    >
+                                        •
+                                    </span>
+                                )}
+                                {paragraph}
+                            </div>
+                        ))}
                     </div>
 
                     {/* Footer Label */}
@@ -952,7 +954,7 @@ export default function AdminPage() {
                             letterSpacing: "1px",
                         }}
                     >
-                        GSS Confession
+                        Global Gss Confession
                     </div>
 
                     {/* Archived Label */}

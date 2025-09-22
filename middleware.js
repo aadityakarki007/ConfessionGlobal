@@ -1,7 +1,12 @@
 import { authMiddleware } from '@clerk/nextjs/server'
 
-export default authMiddleware()
+export default authMiddleware({
+  publicRoutes: ["/", "/((?!admin).*)"], // Everything except admin routes
+})
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/admin/(.*)",  // Only match admin routes
+    "/(api|trpc)(.*)" // And API routes if needed
+  ],
 }
