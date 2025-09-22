@@ -971,7 +971,7 @@ export default function AdminPage() {
                             letterSpacing: "1px",
                         }}
                     >
-                        GSS Confession
+                       Global Gss Confession
                     </div>
 
                     {/* Archived Label */}
