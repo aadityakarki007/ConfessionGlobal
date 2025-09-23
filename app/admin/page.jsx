@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useUser, useAuth, SignIn } from '@clerk/nextjs'; // ADD THIS LINE
 import { useRouter } from 'next/navigation'; // ADD THIS LINE
 import html2canvas from 'html2canvas';
+import { decodeHtmlEntities } from '@/utils/htmlDecoder';
 
 
 export default function AdminPage() {
@@ -490,25 +491,30 @@ export default function AdminPage() {
     };
 
     const fetchConfessions = async () => {
-        try {
-            const response = await fetch('/api/admin/confessions', {
-                credentials: 'include',
-            });
-            const data = await response.json();
+    try {
+        const response = await fetch('/api/admin/confessions', {
+            credentials: 'include',
+        });
+        const data = await response.json();
 
-            if (response.ok) {
-                setConfessions(data);
-            } else if (response.status === 401) {
-                setIsAuthenticated(false);
-            } else {
-                setError(data.error || 'Failed to fetch confessions');
-            }
-        } catch (error) {
-            setError('Network error');
-        } finally {
-            setIsLoading(false);
+        if (response.ok) {
+            // Decode entities for display (if not done server-side)
+            const decodedData = data.map(confession => ({
+                ...confession,
+                content: decodeHtmlEntities(confession.content)
+            }));
+            setConfessions(decodedData);
+        } else if (response.status === 401) {
+            setIsAuthenticated(false);
+        } else {
+            setError(data.error || 'Failed to fetch confessions');
         }
-    };
+    } catch (error) {
+        setError('Network error');
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const fetchStats = async () => {
         try {

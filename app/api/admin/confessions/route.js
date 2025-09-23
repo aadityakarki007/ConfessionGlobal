@@ -1,8 +1,8 @@
-// app/api/admin/confessions/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Confession from '@/models/Confession';
 import { withAdminAuth } from '@/lib/auth';
+import { decodeHtmlEntities } from '@/utils/htmlDecoder';
 
 async function handler(request) {
   try {
@@ -12,7 +12,12 @@ async function handler(request) {
       .sort({ createdAt: -1 })
       .lean();
 
-    return NextResponse.json(confessions);
+    const decodedConfessions = confessions.map(confession => ({
+      ...confession,
+      content: decodeHtmlEntities(confession.content)
+    }));
+
+    return NextResponse.json(decodedConfessions);
 
   } catch (error) {
     console.error('Error fetching confessions:', error);
@@ -23,4 +28,5 @@ async function handler(request) {
   }
 }
 
+// Wrap with admin auth and export as GET
 export const GET = withAdminAuth(handler);
