@@ -197,16 +197,16 @@ export default function HomePage() {
           padding: 0 20px;
         }
 
-        /* Mobile container adjustments */
+        /* Mobile container adjustments - MINIMIZE SIDE PADDING */
         @media (max-width: 768px) {
           .container {
-            padding: 0 15px;
+            padding: 0 5px; /* Minimal side padding */
           }
         }
 
         @media (max-width: 480px) {
           .container {
-            padding: 0 12px;
+            padding: 0 3px; /* Almost no side padding */
           }
         }
 
@@ -227,11 +227,11 @@ export default function HomePage() {
           transform: translateY(-2px);
         }
 
-        /* Mobile glass effect adjustments */
+        /* Mobile glass effect adjustments - REMOVE SIDE MARGINS */
         @media (max-width: 768px) {
           .glass-effect {
             border-radius: 20px;
-            margin: 0 8px;
+            margin: 0 2px; /* Almost no side margins */
           }
           
           .glass-effect:hover {
@@ -242,7 +242,7 @@ export default function HomePage() {
         @media (max-width: 480px) {
           .glass-effect {
             border-radius: 16px;
-            margin: 0 5px;
+            margin: 0 1px; /* Minimal side margins */
           }
         }
 
@@ -250,9 +250,16 @@ export default function HomePage() {
           margin-bottom: 24px;
         }
 
+        /* Mobile form group - REDUCED SPACING */
+        @media (max-width: 768px) {
+          .form-group {
+            margin-bottom: 16px; /* Bring button closer */
+          }
+        }
+
         @media (max-width: 480px) {
           .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px; /* Even closer on small screens */
           }
         }
 
@@ -266,10 +273,17 @@ export default function HomePage() {
           letter-spacing: 0.5px;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
           .form-label {
             font-size: 16px;
             margin-bottom: 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .form-label {
+            font-size: 15px;
+            margin-bottom: 8px;
           }
         }
 
@@ -321,28 +335,46 @@ export default function HomePage() {
           box-sizing: border-box;
         }
 
-        /* Mobile textarea optimizations */
+        /* Mobile textarea optimizations - LARGER AND MORE RECTANGULAR */
         @media (max-width: 768px) {
           .form-input {
-            padding: 16px;
+            padding: 20px; /* More generous padding */
             font-size: 16px;
-            border-radius: 14px;
+            border-radius: 18px; /* More rounded for better look */
           }
           
           .form-textarea {
-            min-height: 150px;
+            min-height: 220px; /* Larger rectangle */
+            max-height: 280px; /* More space */
             resize: none;
+            overflow-y: auto;
+            line-height: 1.5;
+          }
+          
+          .form-input:focus {
+            transform: none;
           }
         }
 
         @media (max-width: 480px) {
           .form-input {
-            padding: 14px;
-            border-radius: 12px;
+            padding: 18px; /* More comfortable padding */
+            border-radius: 16px; /* Better rounded corners */
+            font-size: 16px;
           }
           
           .form-textarea {
-            min-height: 130px;
+            min-height: 200px; /* Larger mobile rectangle */
+            max-height: 250px; /* More generous space */
+            line-height: 1.4;
+          }
+        }
+
+        /* Very small screens - still larger */
+        @media (max-width: 360px) {
+          .form-textarea {
+            min-height: 180px; /* Larger even on small screens */
+            max-height: 220px;
           }
         }
 
@@ -355,6 +387,34 @@ export default function HomePage() {
           color: rgba(255, 255, 255, 0.7);
         }
 
+        /* Mobile character count - KEEP HORIZONTAL */
+        @media (max-width: 768px) {
+          .character-count {
+            flex-direction: row; /* Keep horizontal layout */
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            flex-wrap: wrap; /* Allow wrapping if needed */
+          }
+          
+          .character-count > div {
+            flex-direction: row;
+            gap: 15px !important; /* Reduced gap for mobile */
+            align-items: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .character-count {
+            font-size: 12px;
+            gap: 6px;
+          }
+          
+          .character-count > div {
+            gap: 10px !important; /* Even smaller gap */
+          }
+        }
+
         .security-indicator {
           display: flex;
           align-items: center;
@@ -365,6 +425,13 @@ export default function HomePage() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+          .security-indicator {
+            align-self: flex-end;
+            margin-top: 4px;
+          }
         }
 
         .security-safe {
@@ -418,7 +485,7 @@ export default function HomePage() {
         /* Mobile button optimizations */
         @media (max-width: 768px) {
           .btn {
-            padding: 16px 30px;
+            padding: 16px 28px;
             font-size: 16px;
             border-radius: 14px;
             letter-spacing: 0.8px;
@@ -427,7 +494,7 @@ export default function HomePage() {
 
         @media (max-width: 480px) {
           .btn {
-            padding: 14px 24px;
+            padding: 15px 24px;
             font-size: 15px;
             border-radius: 12px;
             letter-spacing: 0.5px;
@@ -522,6 +589,20 @@ export default function HomePage() {
           display: flex;
           flex-direction: column;
           gap: 12px;
+        }
+
+        /* Hide scroll buttons on mobile - they're irritating */
+        @media (max-width: 768px) {
+          .scroll-indicator {
+            display: none !important; /* Completely hide on tablets and mobile */
+          }
+        }
+
+        /* Keep only for desktop users */
+        @media (min-width: 769px) {
+          .scroll-indicator {
+            display: flex;
+          }
         }
 
         .scroll-btn {
@@ -622,62 +703,179 @@ export default function HomePage() {
 
         @media (max-width: 768px) {
           .scroll-indicator {
-            right: 15px;
-          }
-          
-          .scroll-btn {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-          }
-          
-          .scroll-progress {
-            height: 100px;
+            display: none !important; /* Hide completely on mobile */
           }
         }
 
         @media (max-width: 480px) {
           .scroll-indicator {
-            right: 12px;
+            display: none !important; /* Ensure hidden on small mobile */
+          }
+        }
+
+        /* MOBILE TITLE FIX - Prevent title from wrapping */
+        .title-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: nowrap;
+        }
+
+        @media (max-width: 480px) {
+          .title-container {
+            gap: 8px;
+          }
+        }
+
+        /* MOBILE TEXT SIZE FIXES */
+        .main-description {
+          font-size: clamp(16px, 4vw, 20px);
+          color: rgba(255,255,255,0.95);
+          max-width: 700px;
+          margin: 0 auto 15px;
+          padding: 0 10px;
+          font-weight: 500;
+          line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+          .main-description {
+            font-size: 16px;
+            line-height: 1.5;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .main-description {
+            font-size: 14px;
+            padding: 0 5px;
+          }
+        }
+
+        .sub-description {
+          font-size: clamp(14px, 3.5vw, 16px);
+          color: rgba(255,255,255,0.8);
+          max-width: 600px;
+          margin: 0 auto 25px;
+          padding: 0 10px;
+          font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+          .sub-description {
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .sub-description {
+            font-size: 13px;
+            padding: 0 5px;
+          }
+        }
+
+        .freedom-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 12px 20px;
+          background: rgba(46, 213, 115, 0.2);
+          border: 1px solid rgba(46, 213, 115, 0.3);
+          border-radius: 25px;
+          color: #2ed573;
+          font-size: 14px;
+          font-weight: 600;
+          backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+          .freedom-badge {
+            font-size: 13px;
+            padding: 10px 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .freedom-badge {
+            font-size: 12px;
+            padding: 8px 14px;
+            text-align: center;
+          }
+        }
+
+        .footer-features {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 30px;
+          flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+          .footer-features {
+            gap: 20px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer-features {
+            gap: 15px;
+            font-size: 13px;
           }
           
-          .scroll-btn {
-            width: 45px;
-            height: 45px;
-            font-size: 18px;
+          .footer-features span {
+            flex-basis: calc(50% - 8px);
+            text-align: center;
           }
-          
-          .scroll-progress {
-            height: 80px;
+        }
+
+        .footer-quote {
+          color: rgba(255,255,255,0.9);
+          font-size: clamp(13px, 3vw, 15px);
+          margin: 0;
+          font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+          .footer-quote {
+            font-size: 13px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer-quote {
+            font-size: 12px;
           }
         }
       `}</style>
 
       <div style={{
         minHeight: '100vh',
-        padding: '50px 20px',
+        padding: '30px 20px', /* Reduced from 50px to bring content up */
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)'
       }}>
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
             <h1 style={{
-              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontSize: 'clamp(1.6rem, 4.5vw, 3rem)', /* Reduced from 1.8rem */
               fontWeight: '900',
               marginBottom: '12px',
               textShadow: '0 4px 15px rgba(0,0,0,0.4)',
-              letterSpacing: '-0.5px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px'
+              letterSpacing: '-0.5px'
             }}>
-              <span style={{
-                fontSize: 'clamp(1.8rem, 4.5vw, 2.8rem)',
-                color: '#4CAF50' /* Green color matching your site’s primary color */
-              }}>🔐</span>
-              <span className="header-title" style={{ color: 'white' }}>
-                Global Gss Confession
-              </span>
+              <div className="title-container">
+                <span style={{
+                  fontSize: 'clamp(1.4rem, 4vw, 2.8rem)', /* Reduced from 1.6rem */
+                  color: '#4CAF50'
+                }}>🔐</span>
+                <span className="header-title" style={{ 
+                  color: 'white',
+                  whiteSpace: 'nowrap'
+                }}>
+                  Global Gss Confession
+                </span>
+              </div>
             </h1>
 
             <div style={{
@@ -688,41 +886,15 @@ export default function HomePage() {
               borderRadius: '2px'
             }}></div>
 
-            <p style={{
-              fontSize: 'clamp(16px, 4vw, 20px)',
-              color: 'rgba(255,255,255,0.95)',
-              maxWidth: '700px',
-              margin: '0 auto 15px',
-              padding: '0 10px',
-              fontWeight: '500',
-              lineHeight: '1.6'
-            }}>
+            <p className="main-description">
               Share your deepest thoughts, feelings, and secrets in a completely safe and anonymous environment.
             </p>
 
-            <p style={{
-              fontSize: 'clamp(14px, 3.5vw, 16px)',
-              color: 'rgba(255,255,255,0.8)',
-              maxWidth: '600px',
-              margin: '0 auto 25px',
-              padding: '0 10px',
-              fontStyle: 'italic'
-            }}>
+            <p className="sub-description">
               Your identity will never be revealed. Express yourself freely without fear of judgment.
             </p>
 
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '12px 20px',
-              background: 'rgba(46, 213, 115, 0.2)',
-              border: '1px solid rgba(46, 213, 115, 0.3)',
-              borderRadius: '25px',
-              color: '#2ed573',
-              fontSize: '14px',
-              fontWeight: '600',
-              backdropFilter: 'blur(10px)'
-            }}>
+            <div className="freedom-badge">
               <span style={{ marginRight: '8px' }}>⚠️</span>
               No names are banned currently - Full freedom of expression
             </div>
@@ -751,7 +923,7 @@ export default function HomePage() {
                   <label className="form-label">✍️ Your Anonymous Confession</label>
                   <textarea
                     className={`form-input form-textarea ${isXSSDetected ? 'xss-detected' : ''}`}
-                    placeholder="Pour your heart out... Share what's weighing on your mind, your deepest secrets, confessions, thoughts, or anything you need to express. This is your safe space. (Maximum 1500 characters)"
+                    placeholder="Share your thoughts, secrets, or confessions in this safe space."
                     value={confession}
                     onChange={(e) => setConfession(e.target.value)}
                     maxLength={1500}
@@ -803,7 +975,7 @@ export default function HomePage() {
                   style={{
                     width: '100%',
                     fontSize: 'clamp(16px, 4vw, 20px)',
-                    marginTop: '10px'
+                    marginTop: '8px' /* Reduced from 10px for mobile */
                   }}
                 >
                   {isSubmitting ? (
@@ -822,13 +994,7 @@ export default function HomePage() {
               fontSize: 'clamp(14px, 3.5vw, 16px)',
               padding: '0 10px'
             }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '30px',
-                flexWrap: 'wrap'
-              }}>
+              <div className="footer-features">
                 <span>🔒 100% Anonymous</span>
                 <span>🛡️ XSS Protected</span>
                 <span>🚫 No Registration</span>
@@ -845,12 +1011,7 @@ export default function HomePage() {
               borderRadius: '16px',
               backdropFilter: 'blur(10px)'
             }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.9)',
-                fontSize: 'clamp(13px, 3vw, 15px)',
-                margin: '0',
-                fontStyle: 'italic'
-              }}>
+              <p className="footer-quote">
                 "Sometimes the most healing thing you can do is speak your truth anonymously."
                 <br />
                 <strong>- Your thoughts matter, your privacy is protected.</strong>
