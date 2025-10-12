@@ -62,15 +62,28 @@ async function handler(request) {
 
       const banned = await BannedIP.create(banData);
 
+      // 🔥 AUTO-DELETE ALL CONFESSIONS FROM THIS USER
+      const deleteQuery = {
+        $or: [
+          { ipAddress: confession.ipAddress },
+          confession.fingerprint ? { fingerprint: confession.fingerprint } : null,
+          confession.trackingId ? { trackingId: confession.trackingId } : null,
+          confession.localStorageId ? { localStorageId: confession.localStorageId } : null,
+        ].filter(Boolean) // Remove null values
+      };
+
+      const deleteResult = await Confession.deleteMany(deleteQuery);
+
       return NextResponse.json({
         success: true,
-        message: `User banned successfully across multiple identifiers`,
+        message: `User banned successfully. ${deleteResult.deletedCount} confession(s) deleted.`,
         banned: {
           ip: banned.ip,
           hasFingerprint: !!banned.fingerprint,
           hasTrackingId: !!banned.trackingId,
           hasLocalStorageId: !!banned.localStorageId,
-        }
+        },
+        deletedCount: deleteResult.deletedCount // Add deletion count
       });
     }
 
@@ -92,9 +105,13 @@ async function handler(request) {
         active: true,
       });
 
+      // Also delete confessions by IP only
+      const deleteResult = await Confession.deleteMany({ ipAddress: ip });
+
       return NextResponse.json({
         success: true,
-        message: `IP ${ip} has been banned`
+        message: `IP ${ip} has been banned. ${deleteResult.deletedCount} confession(s) deleted.`,
+        deletedCount: deleteResult.deletedCount
       });
     }
 
