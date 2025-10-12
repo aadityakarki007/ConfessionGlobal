@@ -1,3 +1,4 @@
+// app/api/admin/confessions/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Confession from '@/models/Confession';

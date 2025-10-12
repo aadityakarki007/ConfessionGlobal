@@ -583,55 +583,86 @@ export default function AdminPage() {
         }
     };
 
-    const banUser = async (ipAddress) => {
-        if (!ipAddress) {
-            alert("IP address missing, can't ban user.");
+   const banUser = async (confession) => {
+    if (!confession) {
+        alert("Confession data missing, can't ban user.");
+        return;
+    }
+
+    const ipAddress = confession.ipAddress;
+    
+    // Count how many identifiers we have
+    const identifierCount = [
+        ipAddress,
+        confession.fingerprint,
+        confession.trackingId,
+        confession.localStorageId
+    ].filter(Boolean).length;
+
+    const confirmMessage = `⚠️ BAN THIS USER?\n\n` +
+        `This will ban across ${identifierCount} identifier(s):\n` +
+        `• IP: ${ipAddress}\n` +
+        `${confession.fingerprint ? '• Browser Fingerprint: ✓\n' : '• Browser Fingerprint: ✗\n'}` +
+        `${confession.trackingId ? '• Cookie Tracking: ✓\n' : '• Cookie Tracking: ✗\n'}` +
+        `${confession.localStorageId ? '• LocalStorage: ✓\n' : '• LocalStorage: ✗\n'}` +
+        `\nEven if they use VPN (change IP), they'll still be blocked!\n\n` +
+        `This will also delete ALL their confessions.`;
+
+    if (!confirm(confirmMessage)) return;
+
+    try {
+        // Ban with all identifiers
+        const banResponse = await fetch('/api/admin/ban', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+                confessionId: confession._id,
+                reason: 'Spam/Abuse',
+                notes: `Banned from admin panel - ${identifierCount} identifiers blocked`
+            }),
+        });
+
+        const banData = await banResponse.json();
+
+        if (!banResponse.ok) {
+            if (banResponse.status === 401) {
+                setIsAuthenticated(false);
+                return;
+            }
+            alert(`Failed to ban user: ${banData.error || 'Unknown error'}`);
             return;
         }
 
-        if (!confirm(`Are you sure you want to ban IP: ${ipAddress} and delete their confessions?`)) return;
+        // Delete confessions by IP (your existing deletion)
+        const delResponse = await fetch('/api/admin/confessions/by-ip', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ ip: ipAddress }),
+        });
 
-        try {
-            const banResponse = await fetch('/api/admin/ban', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ ip: ipAddress }),
-            });
+        const delData = await delResponse.json();
 
-            const banData = await banResponse.json();
-
-            if (!banResponse.ok) {
-                if (banResponse.status === 401) {
-                    setIsAuthenticated(false);
-                    return;
-                }
-                alert(`Failed to ban IP: ${banData.error || 'Unknown error'}`);
-                return;
-            }
-
-            const delResponse = await fetch('/api/admin/confessions/by-ip', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ ip: ipAddress }),
-            });
-
-            const delData = await delResponse.json();
-
-            if (!delResponse.ok) {
-                alert(`Failed to delete confessions: ${delData.error || 'Unknown error'}`);
-                return;
-            }
-
-            alert(`IP ${ipAddress} banned and ${delData.deletedCount} confession(s) deleted successfully.`);
-            fetchConfessions();
-
-        } catch (error) {
-            alert('Network error: Failed to ban IP or delete confessions.');
+        if (!delResponse.ok) {
+            alert(`Failed to delete confessions: ${delData.error || 'Unknown error'}`);
+            return;
         }
-    };
 
+        alert(`✅ SUCCESS!\n\n` +
+              `User banned across ${identifierCount} identifier(s)\n` +
+              `${delData.deletedCount} confession(s) deleted\n\n` +
+              `Protection Level: ${banData.banned?.hasFingerprint ? '🟢' : '⚪'} Fingerprint | ` +
+              `${banData.banned?.hasTrackingId ? '🟢' : '⚪'} Cookie | ` +
+              `${banData.banned?.hasLocalStorageId ? '🟢' : '⚪'} LocalStorage`);
+        
+        fetchConfessions();
+        fetchStats();
+
+    } catch (error) {
+        alert('Network error: Failed to ban user or delete confessions.');
+    }
+};
     const filteredConfessions = confessions.filter(confession => {
         if (filter === 'unread') return !confession.isRead;
         if (filter === 'read') return confession.isRead;
@@ -1094,7 +1125,7 @@ export default function AdminPage() {
 
                     {!isArchived && (
                         <button
-                            onClick={() => banUser(confession.ipAddress)}
+                             onClick={() => banUser(confession)}
                             style={{
                                 background: '#ff9500',
                                 color: 'white',

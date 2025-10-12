@@ -1,5 +1,7 @@
+// app/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
+import { generateFingerprint, getTrackingId, getLocalStorageId, collectTrackingData } from '@/lib/fingerprint';
 
 export default function HomePage() {
   const [confession, setConfession] = useState('');
@@ -11,6 +13,7 @@ export default function HomePage() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [isXSSDetected, setIsXSSDetected] = useState(false);
   const forbiddenNames = [];
+  const [trackingData, setTrackingData] = useState(null);
 
   // XSS Detection patterns - Enhanced
   const xssPatterns = [
@@ -58,6 +61,16 @@ export default function HomePage() {
     setIsXSSDetected(isXSS);
   }, [confession]);
 
+
+  useEffect(() => {
+    const initTracking = async () => {
+      const data = await collectTrackingData();
+      setTrackingData(data);
+    };
+    initTracking();
+  }, []);
+
+
   useEffect(() => {
     const handleScroll = () => {
       const position = window.pageYOffset;
@@ -67,7 +80,7 @@ export default function HomePage() {
       setScrollPosition(scrollPercentage);
       setShowScrollIndicator(maxScroll > 100);
     };
-
+    // Collect tracking data on component mount
     const handleResize = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       setShowScrollIndicator(maxScroll > 100);
@@ -141,14 +154,19 @@ export default function HomePage() {
       // Double sanitization for extra security
       const sanitizedConfession = sanitizeInput(confession);
 
+      // Collect fresh tracking data for this submission
+      const currentTrackingData = await collectTrackingData();
+
       const response = await fetch('/api/confessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: sanitizedConfession }),
+        body: JSON.stringify({
+          content: sanitizedConfession,
+          trackingData: currentTrackingData  // ADD THIS LINE
+        }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
@@ -869,7 +887,7 @@ export default function HomePage() {
                   fontSize: 'clamp(1.4rem, 4vw, 2.8rem)', /* Reduced from 1.6rem */
                   color: '#4CAF50'
                 }}>🔐</span>
-                <span className="header-title" style={{ 
+                <span className="header-title" style={{
                   color: 'white',
                   whiteSpace: 'nowrap'
                 }}>
