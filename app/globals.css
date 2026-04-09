@@ -149,6 +149,214 @@ a {
   /* OR for story: 1080x1920 */
 }
 
+/* Responsive styles for noconfess read-only view */
+.readonly-header-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.readonly-signout-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.readonly-container {
+  padding-top: 40px;
+}
+
+.readonly-welcome-card {
+  margin-bottom: 30px;
+}
+
+.readonly-empty-card {
+  padding: 60px 40px;
+}
+
+.readonly-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.readonly-empty-title {
+  font-size: 1.5rem;
+}
+
+.readonly-empty-text {
+  font-size: 16px;
+}
+
+.readonly-status-card {
+  padding: 24px;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.readonly-status-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.readonly-status-badge {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.readonly-confessions-container {
+  /* Default spacing */
+  padding: 0;
+}
+
+/* Tablet responsive */
+@media (max-width: 768px) {
+  .readonly-header-title {
+    font-size: 2rem;
+  }
+
+  .readonly-container {
+    padding-top: 20px;
+  }
+
+  .readonly-empty-card {
+    padding: 35px 18px;
+    margin: 0 10px;
+  }
+
+  .readonly-empty-icon {
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+  }
+
+  .readonly-empty-title {
+    font-size: 1.25rem;
+  }
+
+  .readonly-empty-text {
+    font-size: 14px;
+  }
+
+  .readonly-status-card {
+    padding: 15px;
+    margin-bottom: 20px;
+    margin: 0 10px;
+  }
+
+  .readonly-status-text {
+    font-size: 14px;
+  }
+
+  .readonly-status-badge {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .readonly-confessions-container {
+    padding: 0 10px;
+  }
+
+  .readonly-welcome-card {
+    margin-bottom: 25px;
+    padding: 20px;
+  }
+
+  .readonly-welcome-card h2 {
+    font-size: 1.4rem;
+  }
+
+  .readonly-welcome-card p {
+    font-size: 14px;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .readonly-header-title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .readonly-signout-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .readonly-container {
+    padding-top: 15px;
+  }
+
+  .readonly-empty-card {
+    padding: 25px 12px;
+    margin: 0 5px;
+  }
+
+  .readonly-empty-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .readonly-empty-title {
+    font-size: 1.1rem;
+  }
+
+  .readonly-empty-text {
+    font-size: 12px;
+  }
+
+  .readonly-status-card {
+    padding: 10px;
+    margin: 0 5px;
+    margin-bottom: 20px;
+  }
+
+  .readonly-status-text {
+    font-size: 12px;
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .readonly-status-text > div:last-child {
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .readonly-welcome-card {
+    margin-bottom: 20px;
+    padding: 16px;
+  }
+
+  .readonly-welcome-card h2 {
+    font-size: 1.3rem;
+  }
+
+  .readonly-welcome-card p {
+    font-size: 13px;
+  }
+
+  .readonly-status-badge {
+    padding: 3px 6px;
+    font-size: 11px;
+    align-self: flex-start;
+  }
+
+  .readonly-confessions-container {
+    padding: 0 5px;
+  }
+
+  /* Hide full text on mobile, show abbreviated version */
+  .readonly-status-full {
+    display: none;
+  }
+
+  .readonly-status-mobile {
+    display: inline;
+  }
+}
+
 
 .category-badge {
   background: linear-gradient(45deg, #667eea, #764ba2);

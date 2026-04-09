@@ -325,6 +325,35 @@ export default function AdminPage() {
         }
     };
 
+    // Parse User Agent to extract device info
+    const parseUserAgent = (userAgent) => {
+        if (!userAgent) return null;
+
+        let browser = 'Unknown';
+        let os = 'Unknown';
+        let deviceType = 'Unknown';
+
+        // Browser detection
+        if (userAgent.includes('Chrome') && !userAgent.includes('Chromium')) browser = 'Chrome';
+        else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+        else if (userAgent.includes('Firefox')) browser = 'Firefox';
+        else if (userAgent.includes('Edge')) browser = 'Edge';
+        else if (userAgent.includes('Opera') || userAgent.includes('OPR')) browser = 'Opera';
+
+        // OS detection
+        if (userAgent.includes('Windows')) os = 'Windows';
+        else if (userAgent.includes('Mac')) os = 'macOS';
+        else if (userAgent.includes('Linux')) os = 'Linux';
+        else if (userAgent.includes('Android')) os = 'Android';
+        else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+
+        // Device Type detection
+        if (userAgent.includes('Mobile') || userAgent.includes('Android')) deviceType = 'Mobile';
+        else if (userAgent.includes('iPad') || userAgent.includes('Tablet')) deviceType = 'Tablet';
+        else deviceType = 'Desktop';
+
+        return { browser, os, deviceType };
+    };
 
     // ADD THESE LINES
     const { isLoaded, isSignedIn, user } = useUser();
@@ -344,6 +373,12 @@ export default function AdminPage() {
     const [currentView, setCurrentView] = useState('main');
 
     const [confessionSizes, setConfessionSizes] = useState({});
+    const [selectedConfessionInfo, setSelectedConfessionInfo] = useState(null);
+
+    const userRoles = user?.publicMetadata?.roles || [];
+    const hasConfessRole = userRoles.includes('confess');
+    const hasNoConfessRole = userRoles.includes('noconfess');
+    const isReadOnly = hasNoConfessRole;
 
     const handleArchive = (id) => {
         const toArchive = confessions.find((conf) => conf._id === id);
@@ -372,18 +407,9 @@ export default function AdminPage() {
     };
     useEffect(() => {
         if (isLoaded && isSignedIn && user) {
-            console.log('User loaded:', user);
-            console.log('Public metadata:', user.publicMetadata);
-            console.log('Roles:', user.publicMetadata?.roles);
-
             const userRoles = user.publicMetadata?.roles || [];
-            console.log('Has confess role:', userRoles.includes('confess'));
-
-            if (!userRoles.includes('confess')) {
-                console.log('Access denied - no confess role');
-                // Don't redirect yet, let's see what's happening
-            } else {
-                console.log('Access granted - has confess role');
+            if (!userRoles.includes('confess') && !userRoles.includes('noconfess')) {
+                console.log('Access denied - no matching Clerk role');
             }
         }
     }, [isLoaded, isSignedIn, user, router]);
@@ -392,7 +418,7 @@ export default function AdminPage() {
     useEffect(() => {
         if (isLoaded && isSignedIn && user) {
             const userRoles = user.publicMetadata?.roles || [];
-            if (!userRoles.includes('confess')) {
+            if (!userRoles.includes('confess') && !userRoles.includes('noconfess')) {
                 router.push('/');
                 return;
             }
@@ -406,9 +432,11 @@ export default function AdminPage() {
     useEffect(() => {
         if (isAuthenticated) {
             fetchConfessions();
-            fetchStats();
+            if (hasConfessRole) {
+                fetchStats();
+            }
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, hasConfessRole]);
 
     const checkAuthStatus = async () => {
         try {
@@ -663,13 +691,19 @@ export default function AdminPage() {
         alert('Network error: Failed to ban user or delete confessions.');
     }
 };
-    const filteredConfessions = confessions.filter(confession => {
-        if (filter === 'unread') return !confession.isRead;
-        if (filter === 'read') return confession.isRead;
-        return true;
-    });
+    const filteredConfessions = confessions
+        .filter(confession => {
+            const isRead = confession.isRead === true;
+            if (isReadOnly) return !isRead;
+            if (filter === 'unread') return !isRead;
+            if (filter === 'read') return isRead;
+            return true;
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const renderConfessionCard = (confession, isArchived = false) => {
+    const visibleConfessions = filteredConfessions;
+
+    const renderConfessionCard = (confession, isArchived = false, readonly = false) => {
         const currentSize = getConfessionSize(confession._id);
         return (
             <div
@@ -692,8 +726,8 @@ export default function AdminPage() {
                     alignItems: 'center',
                     flexWrap: 'wrap',
                     fontSize: '12px',
-                    width: '800px',  // Add this line - change to whatever width you want
-                    maxWidth: '100%' // Optional: to ensure it doesn't overflow on smaller screens
+                    width: '100%',
+                    maxWidth: '100%'
                 }}>
                     <span style={{ fontWeight: '500', color: '#666' }}>
                         Size Controls:
@@ -732,7 +766,7 @@ export default function AdminPage() {
                             }}
                         />
                     </div>
-                    <div style={{ display: 'flex', gap: '5px' }}>
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                         <button
                             onClick={() => setConfessionSizes(prev => ({
                                 ...prev,
@@ -818,7 +852,6 @@ export default function AdminPage() {
                         >
                             Proper-3
                         </button>
-
                         <button
                             onClick={() => setConfessionSizes(prev => ({
                                 ...prev,
@@ -836,7 +869,6 @@ export default function AdminPage() {
                         >
                             Proper-2
                         </button>
-
                         <button
                             onClick={() => setConfessionSizes(prev => ({
                                 ...prev,
@@ -871,9 +903,6 @@ export default function AdminPage() {
                         >
                             Long Text
                         </button>
-
-
-
                     </div>
                 </div>
 
@@ -1035,18 +1064,35 @@ export default function AdminPage() {
 
 
                 {/* Buttons outside the box */}
-                <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    justifyContent: 'flex-end',
-                    marginTop: '10px',
-                    flexWrap: 'wrap'
-                }}>
-                    {!confession.isRead && !isArchived && (
+                {!readonly && (
+                    <div style={{
+                        display: 'flex',
+                        gap: '8px',
+                        justifyContent: 'flex-end',
+                        marginTop: '10px',
+                        flexWrap: 'wrap'
+                    }}>
+                        {!confession.isRead && !isArchived && (
+                            <button
+                                onClick={() => markAsRead(confession._id)}
+                                style={{
+                                    background: '#34c759',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Mark as Read
+                            </button>
+                        )}
+
                         <button
-                            onClick={() => markAsRead(confession._id)}
+                            onClick={() => shareConfessionAsImage(confession._id)}
                             style={{
-                                background: '#34c759',
+                                background: '#007aff',
                                 color: 'white',
                                 border: 'none',
                                 padding: '6px 12px',
@@ -1055,32 +1101,45 @@ export default function AdminPage() {
                                 cursor: 'pointer'
                             }}
                         >
-                            Mark as Read
+                            Save as Image
                         </button>
-                    )}
 
-                    <button
-                        onClick={() => shareConfessionAsImage(confession._id)}
-                        style={{
-                            background: '#007aff',
-                            color: 'white',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Save as Image
-                    </button>
+                        {isArchived ? (
+                            <button
+                                onClick={() => handleUnarchive(confession._id)}
+                                style={{
+                                    background: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Unarchive
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => handleArchive(confession._id)}
+                                style={{
+                                    background: '#ffc107',
+                                    color: '#212529',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Archive
+                            </button>
+                        )}
 
-
-
-                    {isArchived ? (
                         <button
-                            onClick={() => handleUnarchive(confession._id)}
+                            onClick={() => deleteConfession(confession._id, isArchived)}
                             style={{
-                                background: '#28a745',
+                                background: '#ff3b30',
                                 color: 'white',
                                 border: 'none',
                                 padding: '6px 12px',
@@ -1089,11 +1148,71 @@ export default function AdminPage() {
                                 cursor: 'pointer'
                             }}
                         >
-                            Unarchive
+                            Delete
                         </button>
-                    ) : (
+
                         <button
-                            onClick={() => handleArchive(confession._id)}
+                            onClick={() => setSelectedConfessionInfo(confession)}
+                            style={{
+                                background: '#17a2b8',
+                                color: 'white',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            ℹ️ Info
+                        </button>
+
+                        {!isArchived && (
+                            <button
+                                 onClick={() => banUser(confession)}
+                                style={{
+                                    background: '#ff9500',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Ban User
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Read-only action buttons */}
+                {readonly && (
+                    <div style={{
+                        display: 'flex',
+                        gap: '8px',
+                        justifyContent: 'flex-end',
+                        marginTop: '10px',
+                        flexWrap: 'wrap'
+                    }}>
+                        <button
+                            onClick={() => alert("You can't perform this action. You have read-only access.")}
+                            style={{
+                                background: '#007aff',
+                                color: 'white',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                cursor: 'not-allowed',
+                                opacity: 0.6
+                            }}
+                            disabled
+                        >
+                            Save as Image
+                        </button>
+
+                        <button
+                            onClick={() => alert("You can't perform this action. You have read-only access.")}
                             style={{
                                 background: '#ffc107',
                                 color: '#212529',
@@ -1101,31 +1220,16 @@ export default function AdminPage() {
                                 padding: '6px 12px',
                                 borderRadius: '6px',
                                 fontSize: '12px',
-                                cursor: 'pointer'
+                                cursor: 'not-allowed',
+                                opacity: 0.6
                             }}
+                            disabled
                         >
                             Archive
                         </button>
-                    )}
 
-                    <button
-                        onClick={() => deleteConfession(confession._id, isArchived)}
-                        style={{
-                            background: '#ff3b30',
-                            color: 'white',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Delete
-                    </button>
-
-                    {!isArchived && (
                         <button
-                             onClick={() => banUser(confession)}
+                            onClick={() => alert("You can't perform this action. You have read-only access.")}
                             style={{
                                 background: '#ff9500',
                                 color: 'white',
@@ -1133,13 +1237,15 @@ export default function AdminPage() {
                                 padding: '6px 12px',
                                 borderRadius: '6px',
                                 fontSize: '12px',
-                                cursor: 'pointer'
+                                cursor: 'not-allowed',
+                                opacity: 0.6
                             }}
+                            disabled
                         >
                             Ban User
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         );
     };
@@ -1149,7 +1255,7 @@ export default function AdminPage() {
     // FIRST: Check if user is signed into Clerk but doesn't have role
     if (isLoaded && isSignedIn) {
         const userRoles = user?.publicMetadata?.roles || [];
-        if (!userRoles.includes('confess')) {
+        if (!userRoles.includes('confess') && !userRoles.includes('noconfess')) {
             return (
                 <div style={{
                     minHeight: '100vh',
@@ -1350,6 +1456,411 @@ export default function AdminPage() {
         return <div className="loading">Loading admin panel...</div>;
     }
 
+    if (isReadOnly) {
+        return (
+            <div style={{ minHeight: '100vh' }}>
+                <div className="admin-header">
+                    <div className="container">
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '20px'
+                        }}>
+                            <h1 className="readonly-header-title" style={{
+                                color: 'white',
+                                textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                                margin: 0
+                            }}>
+                                 Global Gss Confession
+                            </h1>
+                            <div style={{
+                                color: 'rgba(255,255,255,0.9)',
+                                fontSize: '16px',
+                                fontWeight: '400',
+                                textAlign: 'right',
+                                marginTop: '8px',
+                                fontStyle: 'italic',
+                                opacity: 0.8
+                            }}>
+                               Read-Only Access Mode
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="readonly-signout-btn"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.15)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.3)',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s',
+                                        fontWeight: '500'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.target.style.background = 'rgba(255,255,255,0.25)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.target.style.background = 'rgba(255,255,255,0.15)';
+                                    }}
+                                >
+                                    Sign Out {user?.firstName}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container readonly-container">
+                    {/* Welcome Section */}
+                   
+
+                    {visibleConfessions.length === 0 ? (
+                        <div className="card readonly-empty-card" style={{
+                            textAlign: 'center',
+                            background: 'white',
+                            borderRadius: '18px',
+                            boxShadow: '0 12px 32px rgba(0,0,0,0.08)',
+                            border: '2px solid #f0f2f5'
+                        }}>
+                            <div className="readonly-empty-icon">
+                                �
+                            </div>
+                            <h3 style={{
+                                color: '#4b5563',
+                                margin: '0 0 10px 0'
+                            }} className="readonly-empty-title">
+                                All Caught Up!
+                            </h3>
+                            <p style={{
+                                color: '#6b7280',
+                                margin: 0
+                            }} className="readonly-empty-text">
+                                All pending confessions have been reviewed. New submissions will appear here automatically.
+                            </p>
+                            <div style={{
+                                background: '#f8fafc',
+                                padding: '16px',
+                                borderRadius: '12px',
+                                border: '1px solid #e5e7eb',
+                                marginTop: '20px'
+                            }}>
+                                <p style={{
+                                    margin: 0,
+                                    color: '#374151',
+                                    fontSize: '14px',
+                                    fontWeight: '500'
+                                }}>
+                                    💡 <strong>Pro Tip:</strong> Check back periodically or refresh the page to see new confessions as they arrive.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="readonly-status-card" style={{
+                                background: 'white',
+                                borderRadius: '16px',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                                border: '1px solid #e5e7eb',
+                                padding: '20px',
+                                marginBottom: '30px'
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '16px',
+                                    color: '#374151',
+                                    fontWeight: '500'
+                                }} className="readonly-status-text">
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background: 'linear-gradient(45deg, #10b981, #059669)',
+                                        color: 'white',
+                                        borderRadius: '20px',
+                                        padding: '8px 16px',
+                                        fontWeight: '600',
+                                        fontSize: '14px'
+                                    }} className="readonly-status-badge">
+                                        <span>📋</span>
+                                        {visibleConfessions.length} Unreads
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        color: '#6b7280',
+                                        fontSize: '14px',
+                                        fontWeight: '400'
+                                    }}>
+                                        <span>🔒</span>
+                                        <span className="readonly-status-full">Confessions cannot be saved. Confessions will be hidden once read by Admins.</span>
+                                        <span className="readonly-status-mobile" style={{ display: 'none' }}>Read-Only Mode</span><br></br>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="readonly-confessions-container">
+                                {visibleConfessions.map(confession => renderConfessionCard(confession, false, true))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Info Modal for Confession Details - Responsive Layout
+    if (selectedConfessionInfo) {
+        const deviceInfo = parseUserAgent(selectedConfessionInfo.userAgent);
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
+        if (isMobile) {
+            // Mobile: Full-screen modal
+            return (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.7)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 9999,
+                    padding: '20px'
+                }} onClick={() => setSelectedConfessionInfo(null)}>
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '16px',
+                        padding: '30px',
+                        maxWidth: '600px',
+                        width: '100%',
+                        maxHeight: '80vh',
+                        overflow: 'auto',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        position: 'relative'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setSelectedConfessionInfo(null)}
+                            style={{
+                                position: 'absolute',
+                                top: '16px',
+                                right: '16px',
+                                background: '#f0f0f0',
+                                border: 'none',
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                fontSize: '20px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            ✕
+                        </button>
+
+                        <h2 style={{ margin: '0 0 25px 0', color: '#1f2937', fontSize: '24px', fontWeight: '700' }}>
+                            ℹ️ Details
+                        </h2>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Device Type</label>
+                                <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.deviceType || '—'}</div>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Browser</label>
+                                <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.browser || '—'}</div>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>OS</label>
+                                <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.os || '—'}</div>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>IP</label>
+                                <code style={{ display: 'block', fontSize: '12px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.ipAddress || '—'}</code>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0',gridColumn: '1 / -1' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Fingerprint</label>
+                                <code style={{ display: 'block', fontSize: '11px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.fingerprint ? selectedConfessionInfo.fingerprint.substring(0, 20) + '...' : '—'}</code>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Status</label>
+                                <div style={{ display: 'inline-block', background: selectedConfessionInfo.isRead ? '#d1fae5' : '#fee2e2', color: selectedConfessionInfo.isRead ? '#065f46' : '#991b1b', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
+                                    {selectedConfessionInfo.isRead ? '✓ Read' : '◐ Unread'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
+                            <button
+                                onClick={() => setSelectedConfessionInfo(null)}
+                                style={{
+                                    width: '100%',
+                                    background: '#6b7280',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Desktop: Sidebar layout
+        return (
+            <div style={{ minHeight: '100vh', paddingBottom: '40px', display: 'grid', gridTemplateColumns: '1fr 420px', gap: '30px', alignItems: 'start' }}>
+                <div>
+                    <div className="admin-header">
+                        <div className="container">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                                <h1 style={{ fontSize: '2.5rem', color: 'white', textShadow: '0 2px 10px rgba(0,0,0,0.3)', margin: 0 }}>Admin Dashboard</h1>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        onClick={handleLogout}
+                                        style={{
+                                            background: 'rgba(255,255,255,0.2)',
+                                            color: 'white',
+                                            border: '1px solid rgba(255,255,255,0.3)',
+                                            padding: '8px 16px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        Admin Logout
+                                    </button>
+                                    <button
+                                        onClick={() => signOut()}
+                                        style={{
+                                            background: 'rgba(255,0,0,0.2)',
+                                            color: 'white',
+                                            border: '1px solid rgba(255,255,255,0.3)',
+                                            padding: '8px 16px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        Sign Out ({user?.firstName})
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="container" style={{ marginTop: '30px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '18px', color: '#666' }}>Viewing confession details. Close to return to list.</p>
+                        <button
+                            onClick={() => setSelectedConfessionInfo(null)}
+                            style={{
+                                background: '#ef4444',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                marginTop: '10px'
+                            }}
+                        >
+                            Close Details
+                        </button>
+                    </div>
+                </div>
+
+                {/* Sidebar Info Box */}
+                <div style={{
+                    position: 'fixed',
+                    right: '30px',
+                    top: '100px',
+                    width: '420px',
+                    background: 'white',
+                    borderRadius: '16px',
+                    padding: '25px',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                    border: '1px solid #e5e7eb',
+                    maxHeight: 'calc(100vh - 140px)',
+                    overflow: 'auto'
+                }}>
+                    <h2 style={{ margin: '0 0 25px 0', color: '#1f2937', fontSize: '20px', fontWeight: '700' }}>ℹ️ Details</h2>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', marginBottom: '25px' }}>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Device Type</label>
+                            <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.deviceType || '—'}</div>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Browser</label>
+                            <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.browser || '—'}</div>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>OS</label>
+                            <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{deviceInfo?.os || '—'}</div>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>IP Address</label>
+                            <code style={{ display: 'block', fontSize: '12px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.ipAddress || '—'}</code>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Fingerprint</label>
+                            <code style={{ display: 'block', fontSize: '11px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.fingerprint ? selectedConfessionInfo.fingerprint.substring(0, 20) + '...' : '—'}</code>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Tracking ID</label>
+                            <code style={{ display: 'block', fontSize: '11px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.trackingId ? selectedConfessionInfo.trackingId.substring(0, 20) + '...' : '—'}</code>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>LocalStorage</label>
+                            <code style={{ display: 'block', fontSize: '11px', color: '#0f172a', wordBreak: 'break-all', fontFamily: 'Monaco, monospace' }}>{selectedConfessionInfo.localStorageId ? selectedConfessionInfo.localStorageId.substring(0, 20) + '...' : '—'}</code>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Status</label>
+                            <div style={{ display: 'inline-block', background: selectedConfessionInfo.isRead ? '#d1fae5' : '#fee2e2', color: selectedConfessionInfo.isRead ? '#065f46' : '#991b1b', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
+                                {selectedConfessionInfo.isRead ? '✓ Read' : '◐ Unread'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
+                        <button
+                            onClick={() => setSelectedConfessionInfo(null)}
+                            style={{
+                                width: '100%',
+                                background: '#6b7280',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '600'
+                            }}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Main Admin Dashboard (after login)
     return (
         <div style={{ minHeight: '100vh', paddingBottom: '40px' }}>
@@ -1370,7 +1881,30 @@ export default function AdminPage() {
                         }}>
                             Admin Dashboard
                         </h1>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {hasConfessRole && (
+                                <button
+                                    onClick={() => router.push('/admin/all-confessions-details')}
+                                    style={{
+                                        background: 'rgba(0,123,255,0.2)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.3)',
+                                        padding: '8px 16px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        transition: 'all 0.3s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.target.style.background = 'rgba(0,123,255,0.3)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.target.style.background = 'rgba(0,123,255,0.2)';
+                                    }}
+                                >
+                                    Database
+                                </button>
+                            )}
                             <button
                                 onClick={handleLogout}
                                 style={{
