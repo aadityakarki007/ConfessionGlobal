@@ -1,5 +1,6 @@
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
+import AnalyticsWrapper from './AnalyticsWrapper'
 import { Poppins, Noto_Sans } from 'next/font/google'
 
 // Load Google Fonts with optimization
@@ -24,7 +25,10 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en" className={`${poppins.variable} ${notoSans.variable}`}>
-        <body>{children}</body>
+        <body>
+          {children}
+          <AnalyticsWrapper />
+        </body>
       </html>
     </ClerkProvider>
   )
