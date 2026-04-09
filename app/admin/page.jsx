@@ -1588,7 +1588,7 @@ export default function AdminPage() {
                                         fontSize: '14px'
                                     }} className="readonly-status-badge">
                                         <span>📋</span>
-                                        {visibleConfessions.length} Unreads
+                                        {visibleConfessions.length} Showing
                                     </div>
                                     <div style={{
                                         display: 'flex',
