@@ -119,33 +119,6 @@ export default function AllConfessionsDetails() {
           </div>
         )}
 
-        {/* Categories */}
-        {summary && (
-          <div style={{
-            background: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            marginBottom: '40px'
-          }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333' }}>By Category</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px' }}>
-              {Object.entries(summary.byCategory).map(([cat, count]) => (
-                <div key={cat} style={{
-                  background: '#f8f9fa',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  borderLeft: '4px solid #008cba'
-                }}>
-                  <div style={{ fontSize: '12px', color: '#666', textTransform: 'capitalize', marginBottom: '5px' }}>{cat}</div>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>{count}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Confessions Table */}
         <div style={{
           background: 'white',
