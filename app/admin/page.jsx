@@ -691,17 +691,19 @@ export default function AdminPage() {
         alert('Network error: Failed to ban user or delete confessions.');
     }
 };
-    const filteredConfessions = confessions
-        .filter(confession => {
+    const sortedConfessions = [...confessions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const visibleConfessions = isReadOnly
+        ? [
+            ...sortedConfessions.filter(confession => !confession.isRead),
+            ...sortedConfessions.filter(confession => confession.isRead).slice(0, 6)
+          ]
+        : sortedConfessions.filter(confession => {
             const isRead = confession.isRead === true;
-            if (isReadOnly) return !isRead;
             if (filter === 'unread') return !isRead;
             if (filter === 'read') return isRead;
             return true;
-        })
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const visibleConfessions = filteredConfessions;
+        });
 
     const renderConfessionCard = (confession, isArchived = false, readonly = false) => {
         const currentSize = getConfessionSize(confession._id);
@@ -2059,14 +2061,14 @@ export default function AdminPage() {
                         </div>
 
                         <div>
-                            {filteredConfessions.length === 0 ? (
+                            {visibleConfessions.length === 0 ? (
                                 <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
                                     <p style={{ color: '#666', fontSize: '18px' }}>
                                         {filter === 'all' ? 'No confessions yet' : `No ${filter} confessions`}
                                     </p>
                                 </div>
                             ) : (
-                                filteredConfessions.map((confession) => renderConfessionCard(confession, false))
+                                visibleConfessions.map((confession) => renderConfessionCard(confession, false))
                             )}
                         </div>
                     </>
