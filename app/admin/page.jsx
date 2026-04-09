@@ -696,7 +696,7 @@ export default function AdminPage() {
     const visibleConfessions = isReadOnly
         ? [
             ...sortedConfessions.filter(confession => !confession.isRead),
-            ...sortedConfessions.filter(confession => confession.isRead).slice(0, 6)
+            ...sortedConfessions.filter(confession => confession.isRead).slice(0, 50)
           ]
         : sortedConfessions.filter(confession => {
             const isRead = confession.isRead === true;
