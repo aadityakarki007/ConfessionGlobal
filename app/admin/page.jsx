@@ -1272,6 +1272,9 @@ export default function AdminPage() {
                         </div>
                     </div>
 
+
+                    
+
                     <div className="container" style={{ marginTop: '30px', textAlign: 'center' }}>
                         <p style={{ fontSize: '18px', color: '#666' }}>Viewing confession details. Close to return to list.</p>
                         <button
