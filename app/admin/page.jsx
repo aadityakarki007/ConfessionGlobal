@@ -604,7 +604,7 @@ export default function AdminPage() {
 
                 {/* Confession Text */}
                 <div style={{
-                    fontWeight: '410',
+                    fontWeight: '400',
                     fontSize: '16px',
                     lineHeight: '1.7',
                     flex: 1,
